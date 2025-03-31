@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import SideBar from "../Layouts/Sidebar"
 import { Search, FileText, Filter, ChevronDown, Box, Edit, Trash2, Eye, Loader } from "lucide-react"
 import AlmacenesService from "../services/AlmacenesService"
-import "../styles/Salida.css"
+import "../styles/salida.css"
 
 const Salida = () => {
   const [searchTerm, setSearchTerm] = useState("")
