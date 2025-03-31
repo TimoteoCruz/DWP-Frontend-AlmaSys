@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import SideBar from "../Layouts/Sidebar"
 import { Calendar, Clock, Save, Box, FileText, Home, ChevronDown, Edit, Trash2 } from 'lucide-react'
-import "../styles/Programar.css"
+import "../styles/programar.css"
 import ProgramadasService from "../services/ProgramadaService"
 import AlmacenesService from "../services/AlmacenesService"
 
