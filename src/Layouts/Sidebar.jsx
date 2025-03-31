@@ -35,37 +35,37 @@ const SideBar = ({ children }) => {
         <nav className="nav-menu">
           <ul>
             <li className="nav-item">
-              <a href="/almacenes">
+              <a Link="/almacenes">
                 <i className="icon home-icon"></i>
                 <span>Inicio</span>
               </a>
             </li>
             <li className="nav-item">
-              <a href="/programar">
+              <a Link="/programar">
                 <i className="icon clock-icon"></i>
                 <span>Programar</span>
               </a>
             </li>
             <li className="nav-item">
-              <a href="/entrada">
+              <a Link="/entrada">
                 <i className="icon truck-in-icon"></i>
                 <span>Entradas</span>
               </a>
             </li>
             <li className="nav-item">
-              <a href="/salida">
+              <a Link="/salida">
                 <i className="icon truck-out-icon"></i>
                 <span>Salidas</span>
               </a>
             </li>
             <li className="nav-item">
-              <a href="/producto">
+              <a Link="/producto">
                 <i className="icon product-icon"></i>
                 <span>Productos</span>
               </a>
             </li>
             <li className="nav-item active">
-              <a href="/nalmacen">
+              <a Link="/nalmacen">
                 <i className="icon warehouse-icon"></i>
                 <span>Almacenes</span>
               </a>
