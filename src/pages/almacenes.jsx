@@ -16,7 +16,7 @@ import {
   Home,
   HelpCircle,
 } from "lucide-react";
-import "../styles/Almacenes.css";
+import "../styles/almacenes.css";
 
 const Almacenes = () => {
   const navigate = useNavigate();
