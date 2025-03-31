@@ -87,8 +87,8 @@ const NuevoAlmacen = ({ editId }) => {
       }
       
       setTimeout(() => {
-        navigate('/almacenes');
-            }, 2000)
+        window.location.href = "/almacenes";
+                  }, 2000)
       
     } catch (error) {
       console.error("Error:", error)
