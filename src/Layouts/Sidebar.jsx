@@ -35,37 +35,37 @@ const SideBar = ({ children }) => {
         <nav className="nav-menu">
           <ul>
             <li className="nav-item">
-              <button onClick={() => navigate("/almacenes")}>
+              <button className="nav-button" onClick={() => navigate("/almacenes")}>
                 <i className="icon home-icon"></i>
                 <span>Inicio</span>
               </button>
             </li>
             <li className="nav-item">
-              <button onClick={() => navigate("/programar")}>
+              <button className="nav-button" onClick={() => navigate("/programar")}>
                 <i className="icon clock-icon"></i>
                 <span>Programar</span>
               </button>
             </li>
             <li className="nav-item">
-              <button onClick={() => navigate("/entrada")}>
+              <button className="nav-button" onClick={() => navigate("/entrada")}>
                 <i className="icon truck-in-icon"></i>
                 <span>Entradas</span>
               </button>
             </li>
             <li className="nav-item">
-              <button onClick={() => navigate("/salida")}>
+              <button className="nav-button" onClick={() => navigate("/salida")}>
                 <i className="icon truck-out-icon"></i>
                 <span>Salidas</span>
               </button>
             </li>
             <li className="nav-item">
-              <button onClick={() => navigate("/producto")}>
+              <button className="nav-button" onClick={() => navigate("/producto")}>
                 <i className="icon product-icon"></i>
                 <span>Productos</span>
               </button>
             </li>
             <li className="nav-item active">
-              <button onClick={() => navigate("/nalmacen")}>
+              <button className="nav-button" onClick={() => navigate("/nalmacen")}>
                 <i className="icon warehouse-icon"></i>
                 <span>Almacenes</span>
               </button>
