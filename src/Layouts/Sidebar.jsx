@@ -1,8 +1,28 @@
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Sidebar.css";
 import 'font-awesome/css/font-awesome.min.css';
 
+const breadcrumbMap = {
+  "/almacenes": "Inicio > Almacenes",
+  "/programar": "Inicio > Programar",
+  "/entrada": "Inicio > Entradas",
+  "/salida": "Inicio > Salidas",
+  "/producto": "Inicio > Productos",
+  "/nalmacen": "Inicio > Almacenes"
+};
+
 const SideBar = ({ children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const userEmail = localStorage.getItem("email") || "Usuario Desconocido";
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+    navigate("/login");
+  };
+
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -39,7 +59,7 @@ const SideBar = ({ children }) => {
               </a>
             </li>
             <li className="nav-item">
-              <a href="/nentrada">
+              <a href="/producto">
                 <i className="icon product-icon"></i>
                 <span>Productos</span>
               </a>
@@ -53,25 +73,20 @@ const SideBar = ({ children }) => {
           </ul>
         </nav>
 
-        <div className="logout-section">
-          <a href="#logout">
-            <i className="icon logout-icon"></i>
-            <span>Cerrar Sesión</span>
-          </a>
+        <div className="logout-section" onClick={handleLogout} style={{ cursor: "pointer" }}>
+          <i className="icon logout-icon"></i>
+          <span>Cerrar Sesión</span>
         </div>
       </div>
 
       <div className="main-content">
         <div className="top-bar">
           <div className="navigation-path">
-            <a href="/nalmacen">Inicio</a>
-            <span className="separator">&gt;</span>
-            <span className="current-page">Almacenes</span>
+            <span>{breadcrumbMap[location.pathname] || "Inicio"}</span>
           </div>
 
           <div className="search-container">
             <div className="input-wrapper">
-              <i className="search-icon fas fa-search"></i>
               <input
                 type="text"
                 className="search-input"
@@ -84,7 +99,7 @@ const SideBar = ({ children }) => {
             <div className="user-avatar">
               <i className="user-icon"></i>
             </div>
-            <span className="user-name">Usuario_Logeado</span>
+            <span className="user-name">{userEmail}</span>
           </div>
         </div>
 

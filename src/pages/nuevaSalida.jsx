@@ -1,95 +1,93 @@
-import { useState, useEffect } from "react";
-import SideBar from "../Layouts/Sidebar";
-import { Save } from 'lucide-react';
-import "../styles/nuevaEntrada.css";
-import AlmacenesService from "../services/AlmacenesService";
+"use client"
 
-const NuevaEntrada = () => {
+import { useState, useEffect } from "react"
+import SideBar from "../Layouts/Sidebar"
+import { Save } from "lucide-react"
+import "../styles/nuevaEntrada.css"
+import AlmacenesService from "../services/AlmacenesService"
+
+const NuevaSalida = () => {
   const [formData, setFormData] = useState({
     producto: "",
-    proveedor: "",
-    unidadMedida: "",
-    cantidad: "",
     almacenSalida: "",
     almacenLlegada: "",
-    fechaRecepcion: "",
-    estatus: "pendiente", // Valor predeterminado
-    tipoMovimiento: "entrada"  // Agregado el campo "tipoMovimiento"
-  });
-  
+    cantidad: "",
+    fechaSalida: "",
+    motivo: "",
+    estatus: "pendiente",
+    tipoMovimiento: "salida", // Tipo de movimiento para salidas
+  })
 
-  const [productos, setProductos] = useState([]);
-  const [almacenes, setAlmacenes] = useState([]);
+  const [productos, setProductos] = useState([])
+  const [almacenes, setAlmacenes] = useState([])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productosData = await AlmacenesService.getAllProductos();
-        const almacenesData = await AlmacenesService.getAllAlmacenes();
-        setProductos(productosData.map(prod => ({ id: prod.id, nombre: prod.nombreProducto })));
-        setAlmacenes(almacenesData.map(alm => ({ id: alm.id, nombre: alm.nombreAlmacen })));
+        const productosData = await AlmacenesService.getAllProductos()
+        const almacenesData = await AlmacenesService.getAllAlmacenes()
+        setProductos(productosData.map((prod) => ({ id: prod.id, nombre: prod.nombreProducto })))
+        setAlmacenes(almacenesData.map((alm) => ({ id: alm.id, nombre: alm.nombreAlmacen })))
       } catch (error) {
-        console.error("Error al obtener datos:", error);
+        console.error("Error al obtener datos:", error)
       }
-    };
-    fetchData();
-  }, []);
+    }
+    fetchData()
+  }, [])
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [name]: value
-    });
-  };
+      [name]: value,
+    })
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-  
+    e.preventDefault()
+
     if (formData.almacenSalida === formData.almacenLlegada) {
-      alert("El almacén de salida no puede ser el mismo que el de llegada.");
-      return;
+      alert("El almacén de salida no puede ser el mismo que el de llegada.")
+      return
     }
-  
+
     try {
       const movimiento = {
         productoId: formData.producto,
         almacenSalida: formData.almacenSalida,
         almacenLlegada: formData.almacenLlegada,
         cantidad: formData.cantidad,
-        fechaRecepcion: formData.fechaRecepcion,
-        motivo: "Traslado de inventario",
+        fechaRecepcion: formData.fechaSalida,
+        motivo: formData.motivo || "Salida de producto",
         estatus: formData.estatus,
-        tipoMovimiento: formData.tipoMovimiento // Agregado tipoMovimiento
-      };
-  
-      await AlmacenesService.registrarMovimiento(movimiento);
-      alert("Movimiento registrado exitosamente");
-      
+        tipoMovimiento: formData.tipoMovimiento,
+      }
+
+      await AlmacenesService.registrarMovimiento(movimiento)
+      alert("Salida registrada exitosamente")
+
       // Resetear el formulario después del envío exitoso
       setFormData({
         producto: "",
-        proveedor: "",
-        unidadMedida: "",
-        cantidad: "",
         almacenSalida: "",
         almacenLlegada: "",
-        fechaRecepcion: "",
+        cantidad: "",
+        fechaSalida: "",
+        motivo: "",
         estatus: "pendiente",
-        tipoMovimiento: "entrada" // Resetear tipoMovimiento
-      });
+        tipoMovimiento: "salida",
+      })
     } catch (error) {
-      console.error("Error al registrar movimiento:", error);
-      alert("Error al registrar el movimiento: " + (error.message || "Error desconocido"));
+      console.error("Error al registrar salida:", error)
+      alert("Error al registrar la salida: " + (error.message || "Error desconocido"))
     }
-  };
-  
+  }
 
   return (
     <SideBar>
       <div className="nueva-entrada-container">
         <div className="nueva-entrada-header">
-          <h1>Movimiento de Producto</h1>
+          <h1>Salida de Producto</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="nueva-entrada-form">
@@ -106,7 +104,9 @@ const NuevaEntrada = () => {
               >
                 <option value="">Seleccione un producto</option>
                 {productos.map((prod) => (
-                  <option key={prod.id} value={prod.id}>{prod.nombre}</option>
+                  <option key={prod.id} value={prod.id}>
+                    {prod.nombre}
+                  </option>
                 ))}
               </select>
             </div>
@@ -123,7 +123,9 @@ const NuevaEntrada = () => {
               >
                 <option value="">Seleccione un almacén</option>
                 {almacenes.map((alm) => (
-                  <option key={alm.id} value={alm.id}>{alm.nombre}</option>
+                  <option key={alm.id} value={alm.id}>
+                    {alm.nombre}
+                  </option>
                 ))}
               </select>
             </div>
@@ -140,7 +142,9 @@ const NuevaEntrada = () => {
               >
                 <option value="">Seleccione un almacén</option>
                 {almacenes.map((alm) => (
-                  <option key={alm.id} value={alm.id}>{alm.nombre}</option>
+                  <option key={alm.id} value={alm.id}>
+                    {alm.nombre}
+                  </option>
                 ))}
               </select>
             </div>
@@ -148,20 +152,40 @@ const NuevaEntrada = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="proveedor">Proveedor</label>
-              <input type="text" id="proveedor" name="proveedor" value={formData.proveedor} onChange={handleChange} className="form-control" required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="unidadMedida">Unidad de Medida</label>
-              <input type="text" id="unidadMedida" name="unidadMedida" value={formData.unidadMedida} onChange={handleChange} className="form-control" required />
-            </div>
-            <div className="form-group">
               <label htmlFor="cantidad">Cantidad</label>
-              <input type="number" id="cantidad" name="cantidad" value={formData.cantidad} onChange={handleChange} className="form-control" required />
+              <input
+                type="number"
+                id="cantidad"
+                name="cantidad"
+                value={formData.cantidad}
+                onChange={handleChange}
+                className="form-control"
+                required
+              />
             </div>
             <div className="form-group">
-              <label htmlFor="fechaRecepcion">Fecha de Movimiento</label>
-              <input type="date" id="fechaRecepcion" name="fechaRecepcion" value={formData.fechaRecepcion} onChange={handleChange} className="form-control" required />
+              <label htmlFor="fechaSalida">Fecha de Salida</label>
+              <input
+                type="date"
+                id="fechaSalida"
+                name="fechaSalida"
+                value={formData.fechaSalida}
+                onChange={handleChange}
+                className="form-control"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="motivo">Motivo</label>
+              <input
+                type="text"
+                id="motivo"
+                name="motivo"
+                value={formData.motivo}
+                onChange={handleChange}
+                className="form-control"
+                placeholder="Motivo de la salida"
+              />
             </div>
           </div>
 
@@ -186,13 +210,14 @@ const NuevaEntrada = () => {
 
           <div className="form-actions">
             <button type="submit" className="btn-guardar">
-              <Save size={18} /> Registrar Movimiento
+              <Save size={18} /> Registrar Salida
             </button>
           </div>
         </form>
       </div>
     </SideBar>
-  );
-};
+  )
+}
 
-export default NuevaEntrada;
+export default NuevaSalida
+

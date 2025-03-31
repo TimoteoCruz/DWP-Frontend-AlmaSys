@@ -12,6 +12,12 @@ import NuevaEntrada from "../pages/nuevaEntrada";
 import NuevoAlmacen from "../pages/nuevoAlmacen";
 import Estatus from "../pages/estatus";
 import Sestatus from "../pages/sestatus";
+import MFAVerification from "../Layouts/mfa";
+import ResetPassword from "../pages/ResetPassword";
+import EditarAlmacen from "../pages/EditarAlmacen";
+import Productos from "../pages/producto";
+import NuevaSalida from "../pages/nuevaSalida";
+
 
 const AppRouter = () => {
   return (
@@ -30,6 +36,12 @@ const AppRouter = () => {
         <Route path="/nalmacen" element={<NuevoAlmacen />} />
         <Route path="/estatus" element={<Estatus />} />
         <Route path="/sestatus" element={<Sestatus />} />
+        <Route path="/mfa" element={<MFAVerification />} />
+        <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/producto" element={<Productos />} />
+        <Route path="/nsalida" element={<NuevaSalida />} />
+        <Route path="/editar-almacen/:id" element={<EditarAlmacen />} />
+         <Route path="/" element={<Login />} />
         <Route path="*" element={<Error404 />} />
       </Routes>
     </Router>

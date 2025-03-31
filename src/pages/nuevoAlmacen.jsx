@@ -1,11 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import SideBar from "../Layouts/Sidebar"
-import { Save, Warehouse } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import "../styles/NuevoAlmacen.css"
+import AlmacenesService from "../services/AlmacenesService"
 
-const NuevoAlmacen = () => {
+const NuevoAlmacen = ({ editId }) => {
+  // Determinamos si estamos en modo edición basado en la prop
+  const isEditing = !!editId;
+  
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+  
   const [formData, setFormData] = useState({
     nombreAlmacen: "",
     estado: "",
@@ -17,6 +25,40 @@ const NuevoAlmacen = () => {
     codigo: ""
   })
 
+  // Cargar datos si estamos en modo edición
+  useEffect(() => {
+    if (isEditing) {
+      const fetchAlmacen = async () => {
+        try {
+          setLoading(true)
+          setError(null)
+          
+          const almacen = await AlmacenesService.getAlmacenById(editId)
+          
+          // Llenar el formulario con los datos del almacén
+          setFormData({
+            nombreAlmacen: almacen.nombreAlmacen || "",
+            estado: almacen.estado || "",
+            municipio: almacen.municipio || "",
+            ciudad: almacen.ciudad || "",
+            espacios: almacen.espacios?.toString() || "",
+            calle: almacen.calle || "",
+            codigoPostal: almacen.codigoPostal || "",
+            codigo: almacen.codigo || ""
+          })
+          
+        } catch (error) {
+          console.error("Error al cargar datos del almacén:", error)
+          setError("No se pudo cargar la información del almacén. Por favor, intente nuevamente.")
+        } finally {
+          setLoading(false)
+        }
+      }
+      
+      fetchAlmacen()
+    }
+  }, [editId, isEditing])
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({
@@ -25,17 +67,68 @@ const NuevoAlmacen = () => {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Datos del nuevo almacén:", formData)
+    
+    try {
+      setLoading(true)
+      setError(null)
+      setSuccess(false)
+      
+      if (isEditing) {
+        // Actualizar almacén existente
+        await AlmacenesService.updateAlmacen(editId, formData)
+        setSuccess("¡Almacén actualizado exitosamente!")
+      } else {
+        // Crear nuevo almacén
+        await AlmacenesService.createAlmacen(formData)
+        setSuccess("¡Almacén creado exitosamente!")
+      }
+      
+      setTimeout(() => {
+        window.location.href = '/almacenes';
+      }, 2000)
+      
+    } catch (error) {
+      console.error("Error:", error)
+      setError(
+        error.message || 
+        "Ha ocurrido un error. Por favor, intente nuevamente."
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCancel = () => {
+    window.location.href = '/almacenes';
   }
 
   return (
     <SideBar>
       <div className="nuevo-almacen-container">
         <div className="nuevo-almacen-header">
-          <h1>Nuevo Almacén</h1>
+          <button 
+            onClick={handleCancel} 
+            className="btn-volver"
+            aria-label="Volver"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <h1>{isEditing ? 'Editar Almacén' : 'Nuevo Almacén'}</h1>
         </div>
+
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+        
+        {success && (
+          <div className="success-message">
+            {success}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="nuevo-almacen-form">
           <div className="form-section">
@@ -50,6 +143,7 @@ const NuevoAlmacen = () => {
                   className="form-control"
                   placeholder="Nombre del Almacen"
                   required
+                  disabled={loading}
                 />
               </div>
               
@@ -63,6 +157,7 @@ const NuevoAlmacen = () => {
                   className="form-control"
                   placeholder="Estado"
                   required
+                  disabled={loading}
                 />
               </div>
               
@@ -76,6 +171,7 @@ const NuevoAlmacen = () => {
                   className="form-control"
                   placeholder="Municipio"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -91,12 +187,13 @@ const NuevoAlmacen = () => {
                   className="form-control"
                   placeholder="Ciudad"
                   required
+                  disabled={loading}
                 />
               </div>
               
               <div className="form-group">
                 <input
-                  type="text"
+                  type="number"
                   id="espacios"
                   name="espacios"
                   value={formData.espacios}
@@ -104,6 +201,8 @@ const NuevoAlmacen = () => {
                   className="form-control"
                   placeholder="Espacios"
                   required
+                  disabled={loading}
+                  min="1"
                 />
               </div>
               
@@ -117,6 +216,7 @@ const NuevoAlmacen = () => {
                   className="form-control"
                   placeholder="Calle"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -132,6 +232,9 @@ const NuevoAlmacen = () => {
                   className="form-control"
                   placeholder="Código postal"
                   required
+                  disabled={loading}
+                  pattern="[0-9]{5}"
+                  title="El código postal debe tener 5 dígitos"
                 />
               </div>
               
@@ -145,6 +248,7 @@ const NuevoAlmacen = () => {
                   className="form-control"
                   placeholder="Código"
                   required
+                  disabled={loading}
                 />
               </div>
               
@@ -156,8 +260,20 @@ const NuevoAlmacen = () => {
           <div className="form-divider"></div>
           
           <div className="form-actions">
-            <button type="submit" className="btn-agregar">
-              Agregar
+            <button 
+              type="button" 
+              onClick={handleCancel} 
+              className="btn-cancelar"
+              disabled={loading}
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              className="btn-agregar"
+              disabled={loading}
+            >
+              {loading ? 'Procesando...' : isEditing ? 'Actualizar' : 'Agregar'}
             </button>
           </div>
         </form>

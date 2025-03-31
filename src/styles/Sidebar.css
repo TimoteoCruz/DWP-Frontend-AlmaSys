@@ -115,16 +115,20 @@
 }
 
 .logout-section {
-  padding: 1rem;
+  padding: 1rem; /* Reduce el padding */
   margin-top: auto;
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
 }
 
 .logout-section a {
-  color: white;
-  text-decoration: none;
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 100%; /* Asegura que ocupe todo el ancho disponible */
 }
+
 
 .top-bar {
   display: flex;
