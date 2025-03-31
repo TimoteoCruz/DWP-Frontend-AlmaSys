@@ -1,10 +1,10 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import SideBar from "../Layouts/Sidebar"
 import { ArrowLeft } from 'lucide-react'
 import "../styles/nuevoAlmacen.css"
 import AlmacenesService from "../services/AlmacenesService"
+import { useNavigate } from 'react-router-dom';
+
 
 const NuevoAlmacen = ({ editId }) => {
   // Determinamos si estamos en modo edición basado en la prop
@@ -24,6 +24,7 @@ const NuevoAlmacen = ({ editId }) => {
     codigoPostal: "",
     codigo: ""
   })
+  const navigate = useNavigate();
 
   // Cargar datos si estamos en modo edición
   useEffect(() => {
