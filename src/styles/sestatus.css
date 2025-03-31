@@ -1,0 +1,244 @@
+.sestatus-container {
+    padding: 20px;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  
+  .sestatus-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .sestatus-header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .sestatus-search {
+    flex: 1;
+    max-width: 400px;
+  }
+  
+  .sestatus-search form {
+    display: flex;
+  }
+  
+  .sestatus-search input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    font-size: 14px;
+  }
+  
+  .sestatus-search button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 0 16px;
+    border-radius: 0 4px 4px 0;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .sestatus-search button:hover {
+    background-color: #0b7dda;
+  }
+  
+  .sestatus-info-container {
+    background-color: #fff;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .sestatus-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  
+  .sestatus-info-table th,
+  .sestatus-info-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .sestatus-info-table th {
+    background-color: #f8f8f8;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .sestatus-info-table th:first-child,
+  .sestatus-info-table td:first-child {
+    padding-left: 30px;
+  }
+  
+  .sestatus-info-table th:last-child,
+  .sestatus-info-table td:last-child {
+    padding-right: 30px;
+  }
+  
+  .sestatus-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+  }
+  
+  .sestatus-en-camino {
+    background-color: #FFEB3B;
+    color: #856404;
+  }
+  
+  .sestatus-timeline {
+    display: flex;
+    justify-content: space-between;
+    margin: 60px 0;
+    padding: 0 40px;
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    text-align: center;
+    min-width: 180px;
+  }
+  
+  .timeline-icon {
+    margin-bottom: 15px;
+    color: #2c3e50;
+  }
+  
+  .timeline-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .timeline-content h3 {
+    margin: 0;
+    margin-bottom: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .timeline-content p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+    max-width: 200px;
+  }
+  
+  .timeline-date {
+    margin-top: 8px !important;
+    font-size: 12px !important;
+    color: #888 !important;
+  }
+  
+  .timeline-arrow {
+    position: absolute;
+    top: 24px;
+    right: -25px;
+    transform: translateY(-50%);
+  }
+  
+  /* Estilos responsivos */
+  @media screen and (max-width: 768px) {
+    .sestatus-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .sestatus-search {
+      width: 100%;
+      max-width: none;
+    }
+    
+    .timeline-item {
+      margin-bottom: 30px;
+    }
+    
+    .timeline-arrow {
+      display: none;
+    }
+    
+    .sestatus-timeline {
+      flex-direction: column;
+      padding: 0 20px;
+    }
+  }
+  
+  .sestatus-procesado {
+    background-color: #E0E0E0;
+    color: #555;
+  }
+  
+  .sestatus-enviado {
+    background-color: #2196F3;
+    color: white;
+  }
+  
+  .sestatus-recibido {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .confirmar-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 40px;
+  }
+  
+  .confirmar-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: auto;
+  }
+  
+  .confirmar-button:hover {
+    background-color: #3d8b40;
+  }
+  
+  .confirmar-button:active {
+    transform: translateY(1px);
+  }
