@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import SideBar from "../Layouts/Sidebar"
 import { ArrowLeft } from 'lucide-react'
-import "../styles/NuevoAlmacen.css"
+import "../styles/nuevoAlmacen.css"
 import AlmacenesService from "../services/AlmacenesService"
 
 const NuevoAlmacen = ({ editId }) => {
