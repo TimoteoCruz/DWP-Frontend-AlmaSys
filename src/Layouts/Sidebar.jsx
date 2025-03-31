@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom"; // Importar Link desde react-router-dom
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Sidebar.css";
 import 'font-awesome/css/font-awesome.min.css';
 
@@ -35,40 +35,40 @@ const SideBar = ({ children }) => {
         <nav className="nav-menu">
           <ul>
             <li className="nav-item">
-              <Link to="/almacenes">
+              <button onClick={() => navigate("/almacenes")}>
                 <i className="icon home-icon"></i>
                 <span>Inicio</span>
-              </Link>
+              </button>
             </li>
             <li className="nav-item">
-              <Link to="/programar">
+              <button onClick={() => navigate("/programar")}>
                 <i className="icon clock-icon"></i>
                 <span>Programar</span>
-              </Link>
+              </button>
             </li>
             <li className="nav-item">
-              <Link to="/entrada">
+              <button onClick={() => navigate("/entrada")}>
                 <i className="icon truck-in-icon"></i>
                 <span>Entradas</span>
-              </Link>
+              </button>
             </li>
             <li className="nav-item">
-              <Link to="/salida">
+              <button onClick={() => navigate("/salida")}>
                 <i className="icon truck-out-icon"></i>
                 <span>Salidas</span>
-              </Link>
+              </button>
             </li>
             <li className="nav-item">
-              <Link to="/producto">
+              <button onClick={() => navigate("/producto")}>
                 <i className="icon product-icon"></i>
                 <span>Productos</span>
-              </Link>
+              </button>
             </li>
             <li className="nav-item active">
-              <Link to="/nalmacen">
+              <button onClick={() => navigate("/nalmacen")}>
                 <i className="icon warehouse-icon"></i>
                 <span>Almacenes</span>
-              </Link>
+              </button>
             </li>
           </ul>
         </nav>
