@@ -1,7 +1,7 @@
-import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import "../styles/Sidebar.css";
-import 'font-awesome/css/font-awesome.min.css';
+"use client"
+import { useNavigate, useLocation, Link } from "react-router-dom"
+import "../styles/Sidebar.css"
+import "font-awesome/css/font-awesome.min.css"
 
 const breadcrumbMap = {
   "/almacenes": "Inicio > Almacenes",
@@ -9,19 +9,19 @@ const breadcrumbMap = {
   "/entrada": "Inicio > Entradas",
   "/salida": "Inicio > Salidas",
   "/producto": "Inicio > Productos",
-  "/nalmacen": "Inicio > Almacenes"
-};
+  "/nalmacen": "Inicio > Almacenes",
+}
 
 const SideBar = ({ children }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const userEmail = localStorage.getItem("email") || "Usuario Desconocido";
+  const navigate = useNavigate()
+  const location = useLocation()
+  const userEmail = localStorage.getItem("email") || "Usuario Desconocido"
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("email");
-    navigate("/login");
-  };
+    localStorage.removeItem("token")
+    localStorage.removeItem("email")
+    navigate("/login")
+  }
 
   return (
     <div className="app-container">
@@ -35,40 +35,40 @@ const SideBar = ({ children }) => {
         <nav className="nav-menu">
           <ul>
             <li className="nav-item">
-              <button className="nav-button" onClick={() => navigate("/almacenes")}>
+              <Link to="/almacenes">
                 <i className="icon home-icon"></i>
                 <span>Inicio</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item">
-              <button className="nav-button" onClick={() => navigate("/programar")}>
+              <Link to="/programar">
                 <i className="icon clock-icon"></i>
                 <span>Programar</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item">
-              <button className="nav-button" onClick={() => navigate("/entrada")}>
+              <Link to="/entrada">
                 <i className="icon truck-in-icon"></i>
                 <span>Entradas</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item">
-              <button className="nav-button" onClick={() => navigate("/salida")}>
+              <Link to="/salida">
                 <i className="icon truck-out-icon"></i>
                 <span>Salidas</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item">
-              <button className="nav-button" onClick={() => navigate("/producto")}>
+              <Link to="/producto">
                 <i className="icon product-icon"></i>
                 <span>Productos</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item active">
-              <button className="nav-button" onClick={() => navigate("/nalmacen")}>
+              <Link to="/nalmacen">
                 <i className="icon warehouse-icon"></i>
                 <span>Almacenes</span>
-              </button>
+              </Link>
             </li>
           </ul>
         </nav>
@@ -87,11 +87,7 @@ const SideBar = ({ children }) => {
 
           <div className="search-container">
             <div className="input-wrapper">
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Escribe algo aquí"
-              />
+              <input type="text" className="search-input" placeholder="Escribe algo aquí" />
             </div>
           </div>
 
@@ -103,12 +99,11 @@ const SideBar = ({ children }) => {
           </div>
         </div>
 
-        <div className="content-wrapper">
-          {children}
-        </div>
+        <div className="content-wrapper">{children}</div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SideBar;
+export default SideBar
+
