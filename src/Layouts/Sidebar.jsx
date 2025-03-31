@@ -23,6 +23,10 @@ const SideBar = ({ children }) => {
     navigate("/login");
   };
 
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
+
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -35,40 +39,40 @@ const SideBar = ({ children }) => {
         <nav className="nav-menu">
           <ul>
             <li className="nav-item">
-              <a Link="/almacenes">
+              <button onClick={() => handleNavigation("/almacenes")}>
                 <i className="icon home-icon"></i>
                 <span>Inicio</span>
-              </a>
+              </button>
             </li>
             <li className="nav-item">
-              <a Link="/programar">
+              <button onClick={() => handleNavigation("/programar")}>
                 <i className="icon clock-icon"></i>
                 <span>Programar</span>
-              </a>
+              </button>
             </li>
             <li className="nav-item">
-              <a Link="/entrada">
+              <button onClick={() => handleNavigation("/entrada")}>
                 <i className="icon truck-in-icon"></i>
                 <span>Entradas</span>
-              </a>
+              </button>
             </li>
             <li className="nav-item">
-              <a Link="/salida">
+              <button onClick={() => handleNavigation("/salida")}>
                 <i className="icon truck-out-icon"></i>
                 <span>Salidas</span>
-              </a>
+              </button>
             </li>
             <li className="nav-item">
-              <a Link="/producto">
+              <button onClick={() => handleNavigation("/producto")}>
                 <i className="icon product-icon"></i>
                 <span>Productos</span>
-              </a>
+              </button>
             </li>
             <li className="nav-item active">
-              <a Link="/nalmacen">
+              <button onClick={() => handleNavigation("/nalmacen")}>
                 <i className="icon warehouse-icon"></i>
                 <span>Almacenes</span>
-              </a>
+              </button>
             </li>
           </ul>
         </nav>
