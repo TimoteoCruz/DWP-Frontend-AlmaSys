@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom"; // Importar Link desde react-router-dom
 import "../styles/Sidebar.css";
 import 'font-awesome/css/font-awesome.min.css';
 
@@ -23,10 +23,6 @@ const SideBar = ({ children }) => {
     navigate("/login");
   };
 
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
-
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -39,40 +35,40 @@ const SideBar = ({ children }) => {
         <nav className="nav-menu">
           <ul>
             <li className="nav-item">
-              <button onClick={() => handleNavigation("/almacenes")}>
+              <Link to="/almacenes">
                 <i className="icon home-icon"></i>
                 <span>Inicio</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item">
-              <button onClick={() => handleNavigation("/programar")}>
+              <Link to="/programar">
                 <i className="icon clock-icon"></i>
                 <span>Programar</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item">
-              <button onClick={() => handleNavigation("/entrada")}>
+              <Link to="/entrada">
                 <i className="icon truck-in-icon"></i>
                 <span>Entradas</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item">
-              <button onClick={() => handleNavigation("/salida")}>
+              <Link to="/salida">
                 <i className="icon truck-out-icon"></i>
                 <span>Salidas</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item">
-              <button onClick={() => handleNavigation("/producto")}>
+              <Link to="/producto">
                 <i className="icon product-icon"></i>
                 <span>Productos</span>
-              </button>
+              </Link>
             </li>
             <li className="nav-item active">
-              <button onClick={() => handleNavigation("/nalmacen")}>
+              <Link to="/nalmacen">
                 <i className="icon warehouse-icon"></i>
                 <span>Almacenes</span>
-              </button>
+              </Link>
             </li>
           </ul>
         </nav>
