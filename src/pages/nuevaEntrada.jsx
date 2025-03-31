@@ -3,6 +3,8 @@ import SideBar from "../Layouts/Sidebar";
 import { Save } from 'lucide-react';
 import "../styles/nuevaEntrada.css";
 import AlmacenesService from "../services/AlmacenesService";
+import { useNavigate } from 'react-router-dom';
+
 
 const NuevaEntrada = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +19,7 @@ const NuevaEntrada = () => {
     tipoMovimiento: "entrada"  // Agregado el campo "tipoMovimiento"
   });
   
+  const navigate = useNavigate();
 
   const [productos, setProductos] = useState([]);
   const [almacenes, setAlmacenes] = useState([]);
