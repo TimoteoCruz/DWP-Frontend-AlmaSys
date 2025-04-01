@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaLock } from 'react-icons/fa';
 import Footer from '../Layouts/footer';
 import '../styles/Login.css';
 import Swal from 'sweetalert2';
+import AuthService from './path/to/AuthService'; // Adjust the import path as needed
 
 // Componente para solicitar correo y enviar código de recuperación
 const RequestReset = ({ onNextStep, onEmailChange }) => {
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,19 +24,10 @@ const RequestReset = ({ onNextStep, onEmailChange }) => {
       return;
     }
 
+    setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/request-reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al solicitar restablecimiento");
-      }
-
+      await AuthService.requestResetPassword(email);
+      
       Swal.fire({
         icon: 'success',
         title: 'Código enviado',
@@ -51,6 +44,8 @@ const RequestReset = ({ onNextStep, onEmailChange }) => {
         text: error.message || 'Error al solicitar restablecimiento',
         confirmButtonColor: '#d33'
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,9 +59,16 @@ const RequestReset = ({ onNextStep, onEmailChange }) => {
           placeholder="Correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={isLoading}
         />
         <div className="button-group">
-          <button type="submit" className="bg-blue">Enviar código</button>
+          <button 
+            type="submit" 
+            className="bg-blue" 
+            disabled={isLoading}
+          >
+            {isLoading ? 'Enviando...' : 'Enviar código'}
+          </button>
         </div>
       </form>
     </>
@@ -78,6 +80,7 @@ const VerifyAndReset = ({ email, onNextStep }) => {
   const [verificationCode, setVerificationCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -102,23 +105,10 @@ const VerifyAndReset = ({ email, onNextStep }) => {
       return;
     }
 
+    setIsLoading(true);
     try {
       // Verificar código y establecer nueva contraseña
-      const response = await fetch("http://localhost:3000/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email, 
-          verificationCode, 
-          newPassword 
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al restablecer contraseña");
-      }
+      await AuthService.resetPassword(email, verificationCode, newPassword);
 
       Swal.fire({
         icon: 'success',
@@ -135,6 +125,8 @@ const VerifyAndReset = ({ email, onNextStep }) => {
         text: error.message || 'Error al restablecer contraseña',
         confirmButtonColor: '#d33'
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -147,21 +139,30 @@ const VerifyAndReset = ({ email, onNextStep }) => {
           placeholder="Código de verificación"
           value={verificationCode}
           onChange={(e) => setVerificationCode(e.target.value)}
+          disabled={isLoading}
         />
         <input
           type="password"
           placeholder="Nueva contraseña"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+          disabled={isLoading}
         />
         <input
           type="password"
           placeholder="Confirmar contraseña"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          disabled={isLoading}
         />
         <div className="button-group">
-          <button type="submit" className="bg-blue">Restablecer contraseña</button>
+          <button 
+            type="submit" 
+            className="bg-blue"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Procesando...' : 'Restablecer contraseña'}
+          </button>
         </div>
       </form>
     </>
