@@ -14,8 +14,8 @@ const NuevaEntrada = () => {
     almacenSalida: "",
     almacenLlegada: "",
     fechaRecepcion: "",
-    estatus: "pendiente", // Valor predeterminado
-    tipoMovimiento: "entrada"  // Agregado el campo "tipoMovimiento"
+    estatus: "pendiente", 
+    tipoMovimiento: "entrada"  
   });
   
 
@@ -61,13 +61,12 @@ const NuevaEntrada = () => {
         fechaRecepcion: formData.fechaRecepcion,
         motivo: "Traslado de inventario",
         estatus: formData.estatus,
-        tipoMovimiento: formData.tipoMovimiento // Agregado tipoMovimiento
+        tipoMovimiento: formData.tipoMovimiento 
       };
   
       await AlmacenesService.registrarMovimiento(movimiento);
       alert("Movimiento registrado exitosamente");
       
-      // Resetear el formulario después del envío exitoso
       setFormData({
         producto: "",
         proveedor: "",
@@ -77,7 +76,7 @@ const NuevaEntrada = () => {
         almacenLlegada: "",
         fechaRecepcion: "",
         estatus: "pendiente",
-        tipoMovimiento: "entrada" // Resetear tipoMovimiento
+        tipoMovimiento: "entrada" 
       });
     } catch (error) {
       console.error("Error al registrar movimiento:", error);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
-import AuthService from "../services/authService";  // Usamos AuthService
+import AuthService from "../services/authService"; 
 import "../styles/Register.css";
 import Footer from "../Layouts/footer";
 
@@ -8,7 +8,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    empresa: "",  // Usamos "empresa" como en el código original
+    empresa: "",  
     numeroEmpleado: "",
     rfc: "",
   });
@@ -22,9 +22,8 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Usamos AuthService para registrar al usuario con los datos del formulario
       const response = await AuthService.register(formData.email, formData.empresa, formData.password, formData.numeroEmpleado, formData.rfc);
-      setMessage(response.message);  // Mostramos el mensaje de éxito o error
+      setMessage(response.message);  
     } catch (error) {
       setMessage(error.message || "Error al registrar usuario");
     }
@@ -51,7 +50,7 @@ const Register = () => {
           <div className="form-group">
             <input
               type="text"
-              name="empresa"  // Mantenemos "empresa" como en tu código original
+              name="empresa"  
               placeholder="Empresa"
               className="input"
               value={formData.empresa}

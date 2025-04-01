@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 
 
 const NuevoAlmacen = ({ editId }) => {
-  // Determinamos si estamos en modo edición basado en la prop
   const isEditing = !!editId;
   
   const [loading, setLoading] = useState(false)
@@ -26,7 +25,6 @@ const NuevoAlmacen = ({ editId }) => {
   })
   const navigate = useNavigate();
 
-  // Cargar datos si estamos en modo edición
   useEffect(() => {
     if (isEditing) {
       const fetchAlmacen = async () => {
@@ -36,7 +34,6 @@ const NuevoAlmacen = ({ editId }) => {
           
           const almacen = await AlmacenesService.getAlmacenById(editId)
           
-          // Llenar el formulario con los datos del almacén
           setFormData({
             nombreAlmacen: almacen.nombreAlmacen || "",
             estado: almacen.estado || "",
@@ -77,11 +74,9 @@ const NuevoAlmacen = ({ editId }) => {
       setSuccess(false)
       
       if (isEditing) {
-        // Actualizar almacén existente
         await AlmacenesService.updateAlmacen(editId, formData)
         setSuccess("¡Almacén actualizado exitosamente!")
       } else {
-        // Crear nuevo almacén
         await AlmacenesService.createAlmacen(formData)
         setSuccess("¡Almacén creado exitosamente!")
       }

@@ -4,7 +4,7 @@ import { FaUserCircle } from "react-icons/fa";
 import Footer from '../Layouts/footer'; 
 import '../styles/Login.css'; 
 import Swal from 'sweetalert2';
-import AuthService from '../services/authService'; // Ahora usas AuthService
+import AuthService from '../services/authService'; 
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,7 +24,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar los campos
     if (!email || !password) {
       showAlert('warning', 'Campos vacíos', 'Por favor, completa todos los campos.');
       return;
@@ -33,21 +32,16 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Usar AuthService para el login
       const { token, empresa } = await AuthService.login(email, password);
 
-      // Guardar datos en localStorage
       localStorage.setItem("token", token);  
       localStorage.setItem('email', email); 
       localStorage.setItem('empresa', empresa || 'Sin empresa'); 
 
-      // Enviar código de verificación (si es necesario)
       await AuthService.sendVerificationCode(email);
 
-      // Alerta de éxito antes de la navegación
       showAlert('success', 'Inicio de sesión exitoso', 'Redirigiendo a verificación de dos pasos...');
 
-      // Redirigir al usuario a la página de MFA
       navigate('/mfa', { state: { email: email } });
 
     } catch (error) {

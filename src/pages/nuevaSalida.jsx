@@ -15,7 +15,7 @@ const NuevaSalida = () => {
     fechaSalida: "",
     motivo: "",
     estatus: "pendiente",
-    tipoMovimiento: "salida", // Tipo de movimiento para salidas
+    tipoMovimiento: "salida",
   })
 
   const [productos, setProductos] = useState([])
@@ -66,7 +66,6 @@ const NuevaSalida = () => {
       await AlmacenesService.registrarMovimiento(movimiento)
       alert("Salida registrada exitosamente")
 
-      // Resetear el formulario después del envío exitoso
       setFormData({
         producto: "",
         almacenSalida: "",

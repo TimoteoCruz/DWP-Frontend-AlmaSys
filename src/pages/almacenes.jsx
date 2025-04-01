@@ -58,7 +58,6 @@ const Almacenes = () => {
         try {
           await AlmacenesService.deleteAlmacen(almacenId);
           
-          // Update the local state to remove the deleted warehouse
           setAlmacenes(almacenes.filter(a => a.id !== almacenId));
           
           Swal.fire({

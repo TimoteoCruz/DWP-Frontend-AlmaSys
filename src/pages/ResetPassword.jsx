@@ -5,7 +5,6 @@ import Footer from '../Layouts/footer';
 import '../styles/Login.css';
 import Swal from 'sweetalert2';
 import AuthService from '../services/authService';
-// Componente para solicitar correo y enviar código de recuperación
 const RequestReset = ({ onNextStep, onEmailChange }) => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -74,7 +73,6 @@ const RequestReset = ({ onNextStep, onEmailChange }) => {
   );
 };
 
-// Componente para verificar código y establecer nueva contraseña
 const VerifyAndReset = ({ email, onNextStep }) => {
   const [verificationCode, setVerificationCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -106,7 +104,6 @@ const VerifyAndReset = ({ email, onNextStep }) => {
 
     setIsLoading(true);
     try {
-      // Verificar código y establecer nueva contraseña
       await AuthService.resetPassword(email, verificationCode, newPassword);
 
       Swal.fire({
@@ -168,7 +165,6 @@ const VerifyAndReset = ({ email, onNextStep }) => {
   );
 };
 
-// Componente principal de restablecimiento de contraseña
 const ResetPassword = () => {
   const [step, setStep] = useState('request');
   const [email, setEmail] = useState('');

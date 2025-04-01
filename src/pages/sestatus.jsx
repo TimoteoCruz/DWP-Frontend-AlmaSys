@@ -17,17 +17,14 @@ const SEstatus = () => {
   const [estatus, setEstatus] = useState(movimiento?.estadoMostrar || "Procesado")
   const [fechaLlegada, setFechaLlegada] = useState(movimiento?.fechaLlegada || "Pendiente")
 
-  // Configurar long polling para verificar actualizaciones de estado
-  // Ahora usando el nuevo endpoint específico
+
   const { data: statusData } = useLongPolling(() => AlmacenesService.getMovimientoStatus(movimiento?.id), {
-    interval: 5000, // Consultar cada 5 segundos
-    enabled: !!movimiento?.id, // Solo habilitar si tenemos un ID de movimiento
+    interval: 5000,
+    enabled: !!movimiento?.id,
     onSuccess: (data) => {
-      // Actualizar estado local si el estado ha cambiado
       if (data.estatus && data.estatus !== estatus) {
         setEstatus(data.estatus)
 
-        // Actualizar fecha de llegada si el estado es "Recibido"
         if (data.estatus === "Recibido" && data.fechaLlegada) {
           setFechaLlegada(data.fechaLlegada)
         }
@@ -38,14 +35,12 @@ const SEstatus = () => {
   const handleEstatusChange = async (newEstatus) => {
     setEstatus(newEstatus)
 
-    // Actualizar fecha de llegada si el estatus es "Recibido"
     let nuevaFecha = fechaLlegada
     if (newEstatus === "Recibido") {
       nuevaFecha = new Date().toLocaleString()
       setFechaLlegada(nuevaFecha)
     }
 
-    // Llamar a la API para actualizar el estatus en el backend
     try {
       await AlmacenesService.updateMovimientoEstatus(movimiento.id, newEstatus)
     } catch (error) {
@@ -55,11 +50,9 @@ const SEstatus = () => {
 
   const handleConfirmarPedido = async () => {
     try {
-      // Actualizar estatus a "Recibido"
       await handleEstatusChange("Recibido")
       alert("Pedido confirmado con éxito")
 
-      // Redirigir a la página de salidas después de confirmar
       setTimeout(() => {
         navigate("/salida")
       }, 1500)

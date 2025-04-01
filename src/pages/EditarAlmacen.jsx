@@ -56,7 +56,6 @@ const EditarAlmacen = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate required fields
     const requiredFields = [
       'nombreAlmacen', 'estado', 'municipio', 
       'ciudad', 'espacios', 'calle', 

@@ -104,36 +104,27 @@ const Programar = () => {
     e.preventDefault()
     
     try {
-      // Obtener el nombre del producto a partir del ID
       const productoSeleccionado = productos.find(p => p.id === formData.producto)
       const nombreProducto = productoSeleccionado ? productoSeleccionado.nombreProducto : formData.producto
-      
-      // Obtener el nombre del almacén a partir del ID
       const almacenSeleccionado = almacenes.find(a => a.id === formData.almacen)
       const nombreAlmacen = almacenSeleccionado ? almacenSeleccionado.nombreAlmacen : formData.almacen
       
-      // Formatear los datos para la API
       const programadaData = {
         fechaRegistro: formData.fechaRegistro,
-        almacen: formData.almacen, // Guardamos el ID
-        producto: formData.producto, // Guardamos el ID
+        almacen: formData.almacen, 
+        producto: formData.producto, 
         descripcion: formData.descripcion,
         cantidad: parseInt(formData.cantidad),
-        // Campos adicionales para mostrar en la interfaz
         nombreAlmacen,
         nombreProducto
       }
       
-      // Enviar los datos a la API
       await ProgramadasService.createProgramada(programadaData)
       
-      // Mostrar mensaje de éxito
       setSubmitted(true)
       
-      // Recargar la lista de programadas
       fetchProgramadas()
       
-      // Resetear el formulario después de 3 segundos
       setTimeout(() => {
         setFormData({
           fechaRegistro: "",
@@ -153,10 +144,8 @@ const Programar = () => {
 
   const handleEdit = async (id) => {
     try {
-      // Obtener los datos de la entrada programada
       const programada = await ProgramadasService.getProgramadaById(id)
       
-      // Llenar el formulario con los datos
       setFormData({
         fechaRegistro: programada.fechaRegistro,
         hora: programada.hora || "",
@@ -166,8 +155,7 @@ const Programar = () => {
         cantidad: programada.cantidad.toString(),
       })
       
-      // Puedes implementar lógica adicional para manejar la edición
-      // Por ejemplo, cambiar el botón "Agregar" por "Actualizar"
+      
     } catch (err) {
       console.error("Error al obtener entrada programada:", err)
       setError("No se pudo obtener la entrada programada")
@@ -178,7 +166,6 @@ const Programar = () => {
     if (window.confirm("¿Está seguro que desea eliminar esta entrada programada?")) {
       try {
         await ProgramadasService.deleteProgramada(id)
-        // Recargar la lista de programadas
         fetchProgramadas()
       } catch (err) {
         console.error("Error al eliminar entrada programada:", err)
@@ -193,13 +180,11 @@ const Programar = () => {
       programada.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Función para obtener el nombre del almacén a partir del ID
   const getAlmacenNombre = (almacenId) => {
     const almacen = almacenes.find(a => a.id === almacenId)
     return almacen ? almacen.nombreAlmacen : almacenId
   }
 
-  // Función para obtener el nombre del producto a partir del ID
   const getProductoNombre = (productoId) => {
     const producto = productos.find(p => p.id === productoId)
     return producto ? producto.nombreProducto : productoId

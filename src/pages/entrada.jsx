@@ -17,7 +17,6 @@ const Entrada = () => {
   const [productos, setProductos] = useState({})
   const [loading, setLoading] = useState(true)
 
-  // Función para procesar los datos de movimientos
   const processMovimientosData = (movimientosData, almacenesMap, productosMap) => {
     const movimientosNormalizados = (movimientosData || []).map((movimiento) => {
       const estadoMostrar = movimiento.estatus || movimiento.motivo || "Sin estatus"
@@ -42,10 +41,8 @@ const Entrada = () => {
     return movimientosNormalizados
   }
 
-  // Función para obtener todos los datos
   const fetchAllData = async () => {
     try {
-      // Obtener datos de almacenes si aún no los tenemos
       let almacenesMap = almacenes
       if (Object.keys(almacenesMap).length === 0) {
         const almacenesData = await AlmacenesService.getAllAlmacenes()
@@ -58,7 +55,6 @@ const Entrada = () => {
         setAlmacenes(almacenesMap)
       }
 
-      // Obtener datos de productos si aún no los tenemos
       let productosMap = productos
       if (Object.keys(productosMap).length === 0) {
         const productosData = await AlmacenesService.getAllProductos()
@@ -71,7 +67,6 @@ const Entrada = () => {
         setProductos(productosMap)
       }
 
-      // Obtener movimientos
       const response = await AlmacenesService.getMovimientos()
 
       const movimientosNormalizados = processMovimientosData(response.movimientos, almacenesMap, productosMap)
@@ -84,15 +79,13 @@ const Entrada = () => {
     }
   }
 
-  // Configurar long polling para actualizaciones de movimientos
   const { data: pollingData } = useLongPolling(
     async () => {
-      // Para el polling, solo necesitamos obtener los movimientos actualizados
       const response = await AlmacenesService.getMovimientos()
       return processMovimientosData(response.movimientos, almacenes, productos)
     },
     {
-      interval: 10000, // Consultar cada 10 segundos
+      interval: 10000, 
       enabled: Object.keys(almacenes).length > 0 && Object.keys(productos).length > 0,
       onSuccess: (data) => {
         setRegistros(data)
@@ -104,7 +97,6 @@ const Entrada = () => {
     },
   )
 
-  // Carga inicial de datos
   useEffect(() => {
     fetchAllData()
       .then(() => setLoading(false))

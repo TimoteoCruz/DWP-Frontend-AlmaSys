@@ -49,7 +49,6 @@ export function useLongPolling<T>(fetchFn: () => Promise<T>, options: PollingOpt
       }
     }
 
-    // Programar siguiente consulta
     if (mountedRef.current && isPolling) {
       timeoutRef.current = setTimeout(fetchData, interval)
     }
@@ -71,7 +70,6 @@ export function useLongPolling<T>(fetchFn: () => Promise<T>, options: PollingOpt
   }
 
   useEffect(() => {
-    // Iniciar polling inmediatamente si está habilitado y immediate es true
     if (isPolling && immediate) {
       fetchData()
     } else if (isPolling) {
@@ -86,7 +84,6 @@ export function useLongPolling<T>(fetchFn: () => Promise<T>, options: PollingOpt
     }
   }, [isPolling])
 
-  // Si el estado habilitado cambia externamente
   useEffect(() => {
     if (enabled && !isPolling) {
       setIsPolling(true)

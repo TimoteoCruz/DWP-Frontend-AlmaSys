@@ -4,7 +4,7 @@ import { useState } from "react";
 import SideBar from "../Layouts/Sidebar";
 import { Upload, Save, Box } from "lucide-react";
 import "../styles/producto.css";
-import AlmacenesService from "../services/AlmacenesService";  // Importar el servicio
+import AlmacenesService from "../services/AlmacenesService"; 
 
 const RegistroProducto = () => {
   const [formData, setFormData] = useState({
@@ -39,17 +39,14 @@ const RegistroProducto = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Crear el objeto para enviar a la API
     const productoData = {
       ...formData,
-      imagen: imagen, // Si quieres enviar la imagen junto con los datos
+      imagen: imagen,
     };
 
     try {
-      // Llamar al servicio para crear el producto
       const response = await AlmacenesService.createProducto(productoData);
       console.log("Producto registrado exitosamente:", response);
-      // Limpiar el formulario y vista previa después de la creación
       setFormData({
         nombreProducto: "",
         categoria: "",
