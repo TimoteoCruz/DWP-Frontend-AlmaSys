@@ -4,8 +4,7 @@ import { FaLock } from 'react-icons/fa';
 import Footer from '../Layouts/footer';
 import '../styles/Login.css';
 import Swal from 'sweetalert2';
-import AuthService from './services/AuthService'; // Adjust the import path as needed
-
+import AuthService from '../services/authService';
 // Componente para solicitar correo y enviar código de recuperación
 const RequestReset = ({ onNextStep, onEmailChange }) => {
   const [email, setEmail] = useState('');
