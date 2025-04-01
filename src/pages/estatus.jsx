@@ -1,57 +1,78 @@
-import { useState, useEffect } from "react";
-import SideBar from "../Layouts/Sidebar";
-import { Package, Truck, CheckCircle } from "lucide-react";
-import "../styles/estatus.css";
-import AlmacenesService from "../services/AlmacenesService";  // Importar el servicio
-import { useLocation, useNavigate } from "react-router-dom";  // Importamos useLocation
+"use client"
+
+import { useState } from "react"
+import SideBar from "../Layouts/Sidebar"
+import { Package, Truck, CheckCircle } from "lucide-react"
+import "../styles/estatus.css"
+import AlmacenesService from "../services/AlmacenesService"
+import { useLocation, useNavigate } from "react-router-dom"
+import { useLongPolling } from "../hooks/use-long-pollin"
 
 const Estatus = () => {
-  const location = useLocation(); // Obtén la ubicación
-  const navigate = useNavigate();
-  
-  const movimiento = location.state?.movimiento; // Recibimos el movimiento desde la navegación
-  
-  const [estatus, setEstatus] = useState(movimiento?.estadoMostrar || "Procesado");
-  const [fechaLlegada, setFechaLlegada] = useState(movimiento?.fechaLlegada || "Pendiente");
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const movimiento = location.state?.movimiento
+
+  const [estatus, setEstatus] = useState(movimiento?.estadoMostrar || "Procesado")
+  const [fechaLlegada, setFechaLlegada] = useState(movimiento?.fechaLlegada || "Pendiente")
+
+  // Configurar long polling para verificar actualizaciones de estado
+  // Ahora usando el nuevo endpoint específico
+  const { data: statusData } = useLongPolling(() => AlmacenesService.getMovimientoStatus(movimiento.id), {
+    interval: 5000, // Consultar cada 5 segundos
+    enabled: !!movimiento?.id, // Solo habilitar si tenemos un ID de movimiento
+    onSuccess: (data) => {
+      // Actualizar estado local si el estado ha cambiado
+      if (data.estatus && data.estatus !== estatus) {
+        setEstatus(data.estatus)
+
+        // Actualizar fecha de llegada si el estado es "Recibido"
+        if (data.estatus === "Recibido" && data.fechaLlegada) {
+          setFechaLlegada(data.fechaLlegada)
+        }
+      }
+    },
+  })
 
   const handleEstatusChange = async (newEstatus) => {
-    setEstatus(newEstatus);
-  
+    setEstatus(newEstatus)
+
     // Actualizar fecha de llegada si el estatus es "Recibido"
-    let nuevaFecha = fechaLlegada;
+    let nuevaFecha = fechaLlegada
     if (newEstatus === "Recibido") {
-      nuevaFecha = new Date().toLocaleString();
-      setFechaLlegada(nuevaFecha);
+      nuevaFecha = new Date().toLocaleString()
+      setFechaLlegada(nuevaFecha)
     }
-  
+
     // Llamar a la API para actualizar el estatus en el backend
     try {
-      await AlmacenesService.updateMovimientoEstatus(movimiento.id, newEstatus); // Usamos el id del movimiento recibido
+      await AlmacenesService.updateMovimientoEstatus(movimiento.id, newEstatus)
     } catch (error) {
-      console.error("Error al actualizar el estatus:", error);
+      console.error("Error al actualizar el estatus:", error)
     }
-  };
+  }
 
   const historial = [
     {
       estado: "Procesado",
       icono: <Package size={48} />,
       mensaje: "El paquete se prepara para ser enviado.",
-      activo: true
+      activo: true,
     },
     {
       estado: "Enviado",
       icono: estatus !== "Procesado" ? <Truck size={48} /> : null,
       mensaje: "El paquete se ha enviado con éxito.",
-      activo: estatus !== "Procesado"
+      activo: estatus !== "Procesado",
     },
     {
       estado: "Recibido",
       icono: estatus === "Recibido" ? <CheckCircle size={48} /> : null,
       mensaje: "El paquete se ha recibido en el almacén.",
-      activo: estatus === "Recibido"
-    }
-  ];
+      activo: estatus === "Recibido",
+    },
+  ]
 
   return (
     <SideBar>
@@ -109,17 +130,21 @@ const Estatus = () => {
                 {index < historial.length - 1 && historial[index + 1].activo && (
                   <div className="timeline-arrow">
                     <svg width="50" height="24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M49.707 13.707a1 1 0 00.093-1.32l-.093-.094-5-5a1 1 0 00-1.497 1.32l.083.094L47.585 13H1a1 1 0 100 2h46.585l-4.292 4.293a1 1 0 00-.083 1.32l.083.094a1 1 0 001.32.083l.094-.083 5-5z" fill="#000" />
+                      <path
+                        d="M49.707 13.707a1 1 0 00.093-1.32l-.093-.094-5-5a1 1 0 00-1.497 1.32l.083.094L47.585 13H1a1 1 0 100 2h46.585l-4.292 4.293a1 1 0 00-.083 1.32l.083.094a1 1 0 001.32.083l.094-.083 5-5z"
+                        fill="#000"
+                      />
                     </svg>
                   </div>
                 )}
               </div>
-            ) : null
+            ) : null,
           )}
         </div>
       </div>
     </SideBar>
-  );
-};
+  )
+}
 
-export default Estatus;
+export default Estatus
+

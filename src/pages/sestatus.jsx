@@ -2,108 +2,171 @@
 
 import { useState } from "react"
 import SideBar from "../Layouts/Sidebar"
-import { Package, Truck, AlertCircle, Search } from 'lucide-react'
+import { Package, Truck, CheckCircle } from "lucide-react"
 import "../styles/sestatus.css"
+import AlmacenesService from "../services/AlmacenesService"
+import { useLocation, useNavigate } from "react-router-dom"
+import { useLongPolling } from "../hooks/use-long-pollin"
 
-const Sestatus = () => {
-  const [searchCode, setSearchCode] = useState("")
-  const [trackingData, setTrackingData] = useState({
-    codigo: "10392",
-    producto: "Combustible",
-    descripcion: "Etanol",
-    cantidad: "500 L",
-    sestatus: "En camino",
-    fechaLlegada: "10/02/2025 - 10:50 PM",
-    historial: [
-      {
-        estado: "Procesado",
-        icono: <Package size={48} />,
-        mensaje: "El paquete se prepara para ser enviado.",
-        fecha: null
-      },
-      {
-        estado: "Enviado",
-        icono: <Truck size={48} />,
-        mensaje: "El paquete se ha enviado con éxito",
-        fecha: "09/02/2025 - 10:03 AM"
-      },
-      {
-        estado: "Recibido",
-        icono: <AlertCircle size={48} />,
-        mensaje: "El paquete ha llegado a tu almacen.",
-        fecha: "09/02/2025 - 10:03 AM"
+const SEstatus = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const movimiento = location.state?.movimiento
+
+  const [estatus, setEstatus] = useState(movimiento?.estadoMostrar || "Procesado")
+  const [fechaLlegada, setFechaLlegada] = useState(movimiento?.fechaLlegada || "Pendiente")
+
+  // Configurar long polling para verificar actualizaciones de estado
+  // Ahora usando el nuevo endpoint específico
+  const { data: statusData } = useLongPolling(() => AlmacenesService.getMovimientoStatus(movimiento?.id), {
+    interval: 5000, // Consultar cada 5 segundos
+    enabled: !!movimiento?.id, // Solo habilitar si tenemos un ID de movimiento
+    onSuccess: (data) => {
+      // Actualizar estado local si el estado ha cambiado
+      if (data.estatus && data.estatus !== estatus) {
+        setEstatus(data.estatus)
+
+        // Actualizar fecha de llegada si el estado es "Recibido"
+        if (data.estatus === "Recibido" && data.fechaLlegada) {
+          setFechaLlegada(data.fechaLlegada)
+        }
       }
-    ]
+    },
   })
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    console.log("Buscando código:", searchCode)
+  const handleEstatusChange = async (newEstatus) => {
+    setEstatus(newEstatus)
+
+    // Actualizar fecha de llegada si el estatus es "Recibido"
+    let nuevaFecha = fechaLlegada
+    if (newEstatus === "Recibido") {
+      nuevaFecha = new Date().toLocaleString()
+      setFechaLlegada(nuevaFecha)
+    }
+
+    // Llamar a la API para actualizar el estatus en el backend
+    try {
+      await AlmacenesService.updateMovimientoEstatus(movimiento.id, newEstatus)
+    } catch (error) {
+      console.error("Error al actualizar el estatus:", error)
+    }
   }
 
-  const handleConfirmar = () => {
-    console.log("Pedido confirmado")
-    alert("Pedido confirmado con éxito")
+  const handleConfirmarPedido = async () => {
+    try {
+      // Actualizar estatus a "Recibido"
+      await handleEstatusChange("Recibido")
+      alert("Pedido confirmado con éxito")
+
+      // Redirigir a la página de salidas después de confirmar
+      setTimeout(() => {
+        navigate("/salida")
+      }, 1500)
+    } catch (error) {
+      console.error("Error al confirmar pedido:", error)
+      alert("Error al confirmar pedido. Intente nuevamente.")
+    }
   }
+
+  const historial = [
+    {
+      estado: "Procesado",
+      icono: <Package size={48} />,
+      mensaje: "El paquete se prepara para ser enviado.",
+      activo: true,
+    },
+    {
+      estado: "Enviado",
+      icono: estatus !== "Procesado" ? <Truck size={48} /> : null,
+      mensaje: "El paquete se ha enviado con éxito.",
+      activo: estatus !== "Procesado",
+    },
+    {
+      estado: "Recibido",
+      icono: estatus === "Recibido" ? <CheckCircle size={48} /> : null,
+      mensaje: "El paquete se ha recibido en el almacén destino.",
+      activo: estatus === "Recibido",
+    },
+  ]
 
   return (
     <SideBar>
       <div className="sestatus-container">
-  
+        <h1>Estatus de Salida</h1>
 
+        {/* Información del movimiento */}
         <div className="sestatus-info-container">
           <table className="sestatus-info-table">
             <thead>
               <tr>
                 <th>Código</th>
                 <th>Producto</th>
-                <th>Descripción</th>
+                <th>Almacén Origen</th>
+                <th>Almacén Destino</th>
                 <th>Cantidad</th>
-                <th>sestatus</th>
+                <th>Estatus</th>
                 <th>Fecha de Llegada</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{trackingData.codigo}</td>
-                <td>{trackingData.producto}</td>
-                <td>{trackingData.descripcion}</td>
-                <td>{trackingData.cantidad}</td>
+                <td>{movimiento?.id || "N/A"}</td>
+                <td>{movimiento?.nombreProducto || "N/A"}</td>
+                <td>{movimiento?.almacenOrigenNombre || "N/A"}</td>
+                <td>{movimiento?.almacenDestinoNombre || "N/A"}</td>
+                <td>{movimiento?.cantidad || "N/A"}</td>
                 <td>
-                  <span className={`sestatus-badge sestatus-${trackingData.sestatus.toLowerCase().replace(/\s+/g, '-')}`}>
-                    {trackingData.sestatus}
-                  </span>
+                  <select
+                    value={estatus}
+                    onChange={(e) => handleEstatusChange(e.target.value)}
+                    className={`estatus-select estatus-${estatus.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    <option value="Procesado">Procesado</option>
+                    <option value="Enviado">Enviado</option>
+                    <option value="Recibido">Recibido</option>
+                  </select>
                 </td>
-                <td>{trackingData.fechaLlegada}</td>
+                <td>{fechaLlegada}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
+        {/* Timeline de estatus */}
         <div className="sestatus-timeline">
-          {trackingData.historial.map((item, index) => (
-            <div key={index} className="timeline-item">
-              <div className="timeline-icon">
-                {item.icono}
-              </div>
-              <div className="timeline-content">
-                <h3>{item.estado}</h3>
-                <p>{item.mensaje}</p>
-                {item.fecha && <p className="timeline-date">{item.fecha}</p>}
-              </div>
-              {index < trackingData.historial.length - 1 && (
-                <div className="timeline-arrow">
-                  <svg width="50" height="24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M49.707 13.707a1 1 0 00.093-1.32l-.093-.094-5-5a1 1 0 00-1.497 1.32l.083.094L47.585 13H1a1 1 0 100 2h46.585l-4.292 4.293a1 1 0 00-.083 1.32l.083.094a1 1 0 001.32.083l.094-.083 5-5z" fill="#000" fillRule="nonzero"/>
-                  </svg>
+          {historial.map((item, index) =>
+            item.activo ? (
+              <div key={index} className="timeline-item">
+                <div className="timeline-icon">{item.icono}</div>
+                <div className="timeline-content">
+                  <h3>{item.estado}</h3>
+                  <p>{item.mensaje}</p>
+                  {item.estado === "Enviado" && estatus === "Enviado" && (
+                    <p className="timeline-date">{new Date().toLocaleString()}</p>
+                  )}
+                  {item.estado === "Recibido" && estatus === "Recibido" && (
+                    <p className="timeline-date">{fechaLlegada}</p>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+                {index < historial.length - 1 && historial[index + 1].activo && (
+                  <div className="timeline-arrow">
+                    <svg width="50" height="24" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M49.707 13.707a1 1 0 00.093-1.32l-.093-.094-5-5a1 1 0 00-1.497 1.32l.083.094L47.585 13H1a1 1 0 100 2h46.585l-4.292 4.293a1 1 0 00-.083 1.32l.083.094a1 1 0 001.32.083l.094-.083 5-5z"
+                        fill="#000"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ) : null,
+          )}
         </div>
-        
+
+        {/* Botón de confirmar pedido */}
         <div className="confirmar-container">
-          <button className="confirmar-button" onClick={handleConfirmar}>
+          <button className="confirmar-button" onClick={handleConfirmarPedido} disabled={estatus === "Recibido"}>
             Confirmar Pedido
           </button>
         </div>
@@ -112,4 +175,5 @@ const Sestatus = () => {
   )
 }
 
-export default Sestatus
+export default SEstatus
+

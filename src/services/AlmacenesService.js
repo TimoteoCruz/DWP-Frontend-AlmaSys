@@ -165,8 +165,27 @@ async updateMovimientoEstatus(movimientoId, nuevoEstatus) {
     console.error("Error en updateMovimientoEstatus:", error);
     throw error.response?.data || new Error("Error al actualizar el estatus del movimiento");
   }
-}
+},
 
+// Método para obtener el estatus de un movimiento específico
+getMovimientoStatus: async (movimientoId) => {
+  try {
+    const token = getAuthToken();
+    const response = await api.get(`/movimientos/${movimientoId}/status`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data) {
+      return response.data;
+    } else {
+      throw new Error("No se encontraron datos");
+    }
+  } catch (error) {
+    throw error.response?.data || new Error("Error obteniendo estatus del movimiento");
+  }
+}
 
 };
 

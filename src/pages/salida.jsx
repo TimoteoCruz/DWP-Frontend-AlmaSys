@@ -2,93 +2,151 @@
 
 import { useState, useEffect } from "react"
 import SideBar from "../Layouts/Sidebar"
-import { Search, FileText, Filter, ChevronDown, Box, Edit, Trash2, Eye, Loader } from "lucide-react"
+import { FileText, Filter, ChevronDown, Box, Edit } from "lucide-react"
 import AlmacenesService from "../services/AlmacenesService"
+import { useNavigate } from "react-router-dom"
 import "../styles/salida.css"
+import { useLongPolling } from "../hooks/use-long-pollin"
 
 const Salida = () => {
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("Todos")
   const [registros, setRegistros] = useState([])
+  const [almacenes, setAlmacenes] = useState({})
+  const [productos, setProductos] = useState({})
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
 
-  useEffect(() => {
-    const fetchMovimientos = async () => {
-      try {
-        setLoading(true)
-        const response = await AlmacenesService.getMovimientos()
+  const processMovimientos = useState(true)
 
-        // Filter to only show "salida" type movements
-        const salidas = response.movimientos.filter((movimiento) => movimiento.tipoMovimiento === "salida")
+  const processMovimientosData = (movimientosData, almacenesMap, productosMap) => {
+    const salidas = (movimientosData || []).filter((movimiento) => movimiento.tipoMovimiento === "salida")
 
-        // Map the API response to the format expected by the UI
-        const formattedSalidas = salidas.map((salida) => ({
-          id: salida.id,
-          codigo: salida.id.substring(0, 6).toUpperCase(), // Generate a code from the ID
-          producto: salida.nombreProducto,
-          imagen: "/images/placeholder.jpg", // Default image
-          estatus: salida.estatus.charAt(0).toUpperCase() + salida.estatus.slice(1).replace("_", " "), // Format status
-          salida: salida.fechaMovimiento,
-          llegada: salida.fechaMovimiento, // Using the same date if arrival date is not available
-          productoId: salida.productoId,
-          almacenOrigen: salida.almacenOrigen,
-          almacenDestino: salida.almacenDestino,
-          cantidad: salida.cantidad,
-          motivo: salida.motivo,
-        }))
+    const movimientosNormalizados = salidas.map((movimiento) => {
+      const estadoMostrar = movimiento.estatus || movimiento.motivo || "Pendiente"
 
-        setRegistros(formattedSalidas)
-        setError(null)
-      } catch (err) {
-        console.error("Error al cargar movimientos:", err)
-        setError("Error al cargar los datos. Por favor, intente nuevamente.")
-      } finally {
-        setLoading(false)
+      return {
+        ...movimiento,
+        estadoMostrar,
+        almacenOrigenNombre:
+          movimiento.almacenOrigen ||
+          (movimiento.almacenOrigenId
+            ? almacenesMap[movimiento.almacenOrigenId] || "Sin especificar"
+            : "Sin especificar"),
+        almacenDestinoNombre:
+          movimiento.almacenDestino ||
+          (movimiento.almacenDestinoId
+            ? almacenesMap[movimiento.almacenDestinoId] || "Sin especificar"
+            : "Sin especificar"),
+        codigoSKU: movimiento.productoId ? productosMap[movimiento.productoId] || "N/A" : "N/A",
       }
-    }
+    })
 
-    fetchMovimientos()
+    return movimientosNormalizados
+  }
+
+  // Función para obtener todos los datos
+  const fetchAllData = async () => {
+    try {
+      // Obtener datos de almacenes si aún no los tenemos
+      let almacenesMap = almacenes
+      if (Object.keys(almacenesMap).length === 0) {
+        const almacenesData = await AlmacenesService.getAllAlmacenes()
+
+        almacenesMap = {}
+        almacenesData.forEach((almacen) => {
+          almacenesMap[almacen.id] = almacen.nombre
+        })
+
+        setAlmacenes(almacenesMap)
+      }
+
+      // Obtener datos de productos si aún no los tenemos
+      let productosMap = productos
+      if (Object.keys(productosMap).length === 0) {
+        const productosData = await AlmacenesService.getAllProductos()
+
+        productosMap = {}
+        productosData.forEach((producto) => {
+          productosMap[producto.id] = producto.codigoSKU || producto.codigo
+        })
+
+        setProductos(productosMap)
+      }
+
+      // Obtener movimientos
+      const response = await AlmacenesService.getMovimientos()
+
+      const movimientosNormalizados = processMovimientosData(response.movimientos, almacenesMap, productosMap)
+
+      setRegistros(movimientosNormalizados)
+      return movimientosNormalizados
+    } catch (error) {
+      console.error("Error al cargar datos:", error)
+      throw error
+    }
+  }
+
+  // Configurar long polling para actualizaciones de movimientos
+  const { data: pollingData } = useLongPolling(
+    async () => {
+      // Para el polling, solo necesitamos obtener los movimientos actualizados
+      const response = await AlmacenesService.getMovimientos()
+      return processMovimientosData(response.movimientos, almacenes, productos)
+    },
+    {
+      interval: 10000, // Consultar cada 10 segundos
+      enabled: Object.keys(almacenes).length > 0 && Object.keys(productos).length > 0,
+      onSuccess: (data) => {
+        setRegistros(data)
+        setLoading(false)
+      },
+      onError: () => {
+        setLoading(false)
+      },
+    },
+  )
+
+  // Carga inicial de datos
+  useEffect(() => {
+    fetchAllData()
+      .then(() => setLoading(false))
+      .catch(() => setLoading(false))
   }, [])
+
+  const handleNuevaSalida = () => {
+    navigate("/nsalida")
+  }
+
+  const handleEditEstatus = (registro) => {
+    navigate("/sestatus", { state: { movimiento: registro } })
+  }
 
   const filteredRegistros = registros.filter((registro) => {
     const matchesSearch =
-      registro.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      registro.producto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      registro.salida.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (registro.almacenOrigen && registro.almacenOrigen.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (registro.almacenDestino && registro.almacenDestino.toLowerCase().includes(searchTerm.toLowerCase()))
+      (registro.productoId && String(registro.productoId).toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (registro.nombreProducto && registro.nombreProducto.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (registro.codigoSKU && registro.codigoSKU.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (registro.almacenOrigenNombre && registro.almacenOrigenNombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (registro.almacenDestinoNombre &&
+        registro.almacenDestinoNombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (registro.estadoMostrar && registro.estadoMostrar.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (registro.fechaMovimiento && registro.fechaMovimiento.toLowerCase().includes(searchTerm.toLowerCase()))
 
-    const matchesStatus = statusFilter === "Todos" || registro.estatus === statusFilter
+    const matchesStatus =
+      statusFilter === "Todos" ||
+      (registro.estadoMostrar && registro.estadoMostrar.toLowerCase() === statusFilter.toLowerCase())
 
     return matchesSearch && matchesStatus
   })
 
-  const statusOptions = ["Todos", "Pendiente", "En tránsito", "Completado", "Cancelado"]
-
-  const handleNuevaSalida = () => {
-    window.location.href = "/nsalida"
+  const getUniqueStatuses = () => {
+    const allStatuses = registros.map((r) => r.estadoMostrar)
+    const uniqueStatuses = [...new Set(allStatuses)]
+    return ["Todos", ...uniqueStatuses.filter((s) => s)]
   }
 
-  const handleViewDetails = (id) => {
-    // Navigate to details page or show modal with details
-    console.log("Ver detalles de:", id)
-  }
-
-  const handleEdit = (id) => {
-    // Navigate to edit page
-    console.log("Editar:", id)
-  }
-
-  const handleDelete = (id) => {
-    // Show confirmation dialog and delete if confirmed
-    if (window.confirm("¿Está seguro que desea eliminar este registro?")) {
-      console.log("Eliminar:", id)
-      // Implement delete logic here
-    }
-  }
-
-  
+  const statusOptions = getUniqueStatuses()
 
   return (
     <SideBar>
@@ -97,10 +155,9 @@ const Salida = () => {
           <h1>Salidas de Productos</h1>
           <div className="search-filters">
             <div className="search-box">
-              <Search size={18} className="search-icon" />
               <input
                 type="text"
-                placeholder="Buscar por código, producto, almacén..."
+                placeholder="Buscar productos, almacenes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -120,23 +177,15 @@ const Salida = () => {
             </div>
             <button className="btn-nuevo" onClick={handleNuevaSalida}>
               <Box size={18} />
-              Nueva Salida
+              Nueva salida
             </button>
           </div>
         </div>
 
         <div className="salida-table-container">
           {loading ? (
-            <div className="loading-container">
-              <Loader size={48} className="animate-spin" />
+            <div className="loading">
               <p>Cargando datos...</p>
-            </div>
-          ) : error ? (
-            <div className="error-container">
-              <p>{error}</p>
-              <button className="btn-retry" onClick={() => window.location.reload()}>
-                Reintentar
-              </button>
             </div>
           ) : filteredRegistros.length === 0 ? (
             <div className="no-results">
@@ -153,7 +202,8 @@ const Salida = () => {
                 <div className="header-cell">Almacén Destino</div>
                 <div className="header-cell">Cantidad</div>
                 <div className="header-cell">Estatus</div>
-                <div className="header-cell">Fecha</div>
+                <div className="header-cell">Fecha Movimiento</div>
+                <div className="header-cell">Fecha Llegada</div>
                 <div className="header-cell actions-cell">Acciones</div>
               </div>
 
@@ -162,35 +212,28 @@ const Salida = () => {
                   <div key={registro.id} className="salida-table-row">
                     <div className="cell image-cell">
                       <img
-                        src={registro.imagen || "/placeholder.svg"}
-                        alt={registro.producto}
-                        onError={(e) => {
-                          e.target.onerror = null
-                          e.target.src = "/images/placeholder.jpg"
-                        }}
+                        src={registro.imagen || "/images/placeholder.jpg"}
+                        alt={registro.nombreProducto || "Producto desconocido"}
                       />
                     </div>
-                    <div className="cell">{registro.codigo}</div>
-                    <div className="cell">{registro.producto}</div>
-                    <div className="cell">{registro.almacenOrigen || "N/A"}</div>
-                    <div className="cell">{registro.almacenDestino || "N/A"}</div>
+                    <div className="cell">{registro.codigoSKU || "N/A"}</div>
+                    <div className="cell">{registro.nombreProducto || "Producto desconocido"}</div>
+                    <div className="cell">{registro.almacenOrigenNombre}</div>
+                    <div className="cell">{registro.almacenDestinoNombre}</div>
                     <div className="cell">{registro.cantidad || "N/A"}</div>
                     <div className="cell">
-                      <span className={`status-badge status-${registro.estatus.toLowerCase().replace(" ", "-")}`}>
-                        {registro.estatus}
+                      <span
+                        className={`status-badge status-${registro.estadoMostrar.toLowerCase().replace(/\s+/g, "-")}`}
+                      >
+                        {registro.estadoMostrar}
                       </span>
                     </div>
-                    <div className="cell">{registro.salida}</div>
+                    <div className="cell">{registro.fechaMovimiento || "Fecha desconocida"}</div>
+                    <div className="cell">{registro.fechaLlegada || "Pendiente"}</div>
                     <div className="cell actions-cell">
-                      
-                      <button
-                        className="action-button edit-button"
-                        onClick={() => handleEdit(registro.id)}
-                        title="Editar"
-                      >
+                      <button className="action-button edit-button" onClick={() => handleEditEstatus(registro)}>
                         <Edit size={16} />
                       </button>
-                     
                     </div>
                   </div>
                 ))}
