@@ -67,7 +67,7 @@ const Salida = () => {
   const statusOptions = ["Todos", "Pendiente", "En tránsito", "Completado", "Cancelado"]
 
   const handleNuevaSalida = () => {
-    window.location.href = "/nueva-salida"
+    window.location.href = "/nsalida"
   }
 
   const handleViewDetails = (id) => {
@@ -87,6 +87,8 @@ const Salida = () => {
       // Implement delete logic here
     }
   }
+
+  
 
   return (
     <SideBar>
@@ -180,13 +182,7 @@ const Salida = () => {
                     </div>
                     <div className="cell">{registro.salida}</div>
                     <div className="cell actions-cell">
-                      <button
-                        className="action-button view-button"
-                        onClick={() => handleViewDetails(registro.id)}
-                        title="Ver detalles"
-                      >
-                        <Eye size={16} />
-                      </button>
+                      
                       <button
                         className="action-button edit-button"
                         onClick={() => handleEdit(registro.id)}
@@ -194,13 +190,7 @@ const Salida = () => {
                       >
                         <Edit size={16} />
                       </button>
-                      <button
-                        className="action-button delete-button"
-                        onClick={() => handleDelete(registro.id)}
-                        title="Eliminar"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                     
                     </div>
                   </div>
                 ))}

@@ -23,7 +23,6 @@ const RequestReset = ({ onNextStep, onEmailChange }) => {
     }
 
     try {
-      // Solicitud al servidor para enviar el código de recuperación
       const response = await fetch("http://localhost:3000/request-reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

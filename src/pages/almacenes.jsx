@@ -122,15 +122,11 @@ const Almacenes = () => {
             <Home size={24} className="mr-2" /> Almacenes
           </h1>
           <div className="header-buttons">
-            <button className="btn-filtros">
-              <Filter size={18} /> Filtros
-            </button>
+          
             <button className="btn-agregar" onClick={() => navigate("/nalmacen")}>
               <PlusCircle size={18} /> Agregar
             </button>
-            <button className="btn-help" onClick={handleHelp}>
-              <HelpCircle size={18} />
-            </button>
+          
           </div>
         </div>
 

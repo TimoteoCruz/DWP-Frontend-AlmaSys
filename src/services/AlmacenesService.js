@@ -140,27 +140,33 @@ getMovimientos: async () => {
   }
 },
 
- async updateMovimientoEstatus(movimientoId, nuevoEstatus)
-{
+async updateMovimientoEstatus(movimientoId, nuevoEstatus) {
   try {
-    const response = await fetch(`/api/movimientos/${movimientoId}/estatus`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ estatus: nuevoEstatus }),
-    })
+    const token = getAuthToken(); // Obtener el token de autenticación
+    const response = await api.put(
+      `/movimientos/${movimientoId}/estatus`, // URL del endpoint
+      { estatus: nuevoEstatus }, // Cuerpo de la solicitud
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Pasar el token en el header
+          "Content-Type": "application/json", // Especificar el tipo de contenido
+        },
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error("Error al actualizar el estatus del movimiento")
+    // Si la respuesta es exitosa, retornar los datos
+    if (response.data) {
+      return response.data;
+    } else {
+      throw new Error("No se pudo actualizar el estatus");
     }
-
-    return await response.json();
   } catch (error) {
-    console.error("Error en updateMovimientoEstatus:", error)
-    throw error
+    // Manejo de errores, puede ser por falta de autorización o problemas con la petición
+    console.error("Error en updateMovimientoEstatus:", error);
+    throw error.response?.data || new Error("Error al actualizar el estatus del movimiento");
   }
 }
+
 
 };
 

@@ -5,12 +5,15 @@ import SideBar from "../Layouts/Sidebar";
 import { Search, FileText, Filter, Calendar, ChevronDown, Box, Save, Edit, Trash2, Eye } from 'lucide-react';
 import "../styles/entrada.css";
 import AlmacenesService from "../services/AlmacenesService";
+import { useNavigate } from "react-router-dom";
 
 const Entrada = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [registros, setRegistros] = useState([]);
   const [almacenes, setAlmacenes] = useState({});
+  const [productos, setProductos] = useState({}); 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,10 +21,8 @@ const Entrada = () => {
       try {
         setLoading(true);
         
-        // Obtener los almacenes
         const almacenesData = await AlmacenesService.getAllAlmacenes();
         
-        // Crear un objeto de mapeo de ID a nombre para acceso rápido
         const almacenesMap = {};
         almacenesData.forEach(almacen => {
           almacenesMap[almacen.id] = almacen.nombre;
@@ -29,22 +30,28 @@ const Entrada = () => {
         
         setAlmacenes(almacenesMap);
         
-        // Obtener los movimientos
+        const productosData = await AlmacenesService.getAllProductos();
+        
+        const productosMap = {};
+        productosData.forEach(producto => {
+          productosMap[producto.id] = producto.codigoSKU || producto.codigo;
+        });
+        
+        setProductos(productosMap);
+        
         const response = await AlmacenesService.getMovimientos();
         
-        // Normalizar los datos para tener una estructura consistente
         const movimientosNormalizados = (response.movimientos || []).map(movimiento => {
-          // Determinar el estado a mostrar (priorizar estatus sobre motivo)
           const estadoMostrar = movimiento.estatus || movimiento.motivo || 'Sin estatus';
           
           return {
             ...movimiento,
             estadoMostrar,
-            // Normalizar los campos de almacenes
             almacenOrigenNombre: movimiento.almacenOrigen || 
                                (movimiento.almacenOrigenId ? almacenesMap[movimiento.almacenOrigenId] || 'Sin especificar' : 'Sin especificar'),
             almacenDestinoNombre: movimiento.almacenDestino || 
-                                (movimiento.almacenDestinoId ? almacenesMap[movimiento.almacenDestinoId] || 'Sin especificar' : 'Sin especificar')
+                                (movimiento.almacenDestinoId ? almacenesMap[movimiento.almacenDestinoId] || 'Sin especificar' : 'Sin especificar'),
+            codigoSKU: movimiento.productoId ? productosMap[movimiento.productoId] || 'N/A' : 'N/A'
           };
         });
         
@@ -60,11 +67,19 @@ const Entrada = () => {
     fetchData();
   }, []);
 
-  // Filtrar los registros basados en los filtros de búsqueda y estado
+  const handleNuevaEntrada = () => {
+    navigate("/nentrada");
+  };
+
+  const handleEditEstatus = (registro) => {
+    navigate("/estatus", { state: { movimiento: registro } });
+  };
+
   const filteredRegistros = registros.filter((registro) => {
     const matchesSearch =
       (registro.productoId?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
       (registro.nombreProducto?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
+      (registro.codigoSKU?.toLowerCase().includes(searchTerm.toLowerCase()) || '') || 
       (registro.almacenOrigenNombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (registro.almacenDestinoNombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (registro.estadoMostrar.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
@@ -76,7 +91,6 @@ const Entrada = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Obtener todos los estados únicos de los registros para el filtro
   const getUniqueStatuses = () => {
     const allStatuses = registros.map(r => r.estadoMostrar);
     const uniqueStatuses = [...new Set(allStatuses)];
@@ -92,7 +106,6 @@ const Entrada = () => {
           <h1>Entradas de Productos</h1>
           <div className="search-filters">
             <div className="search-box">
-              <Search size={18} className="search-icon" />
               <input
                 type="text"
                 placeholder="Buscar productos, almacenes..."
@@ -116,7 +129,7 @@ const Entrada = () => {
                 <ChevronDown size={16} className="select-icon" />
               </div>
             </div>
-            <button className="btn-nuevo">
+            <button className="btn-nuevo" onClick={handleNuevaEntrada}>
               <Box size={18} />
               Nueva entrada
             </button>
@@ -153,7 +166,7 @@ const Entrada = () => {
                     <div className="cell image-cell">
                       <img src={registro.imagen || '/images/placeholder.jpg'} alt={registro.nombreProducto || 'Producto desconocido'} />
                     </div>
-                    <div className="cell">{registro.codigo || 'N/A'}</div>
+                    <div className="cell">{registro.codigoSKU || 'N/A'}</div>
                     <div className="cell">{registro.nombreProducto || 'Producto desconocido'}</div>
                     <div className="cell">{registro.almacenOrigenNombre}</div>
                     <div className="cell">{registro.almacenDestinoNombre}</div>
@@ -165,14 +178,11 @@ const Entrada = () => {
                     <div className="cell">{registro.fechaMovimiento || 'Fecha desconocida'}</div>
                     <div className="cell">{registro.fechaLlegada || 'Pendiente'}</div>
                     <div className="cell actions-cell">
-                      <button className="action-button view-button">
-                        <Eye size={16} />
-                      </button>
-                      <button className="action-button edit-button">
+                      <button
+                        className="action-button edit-button"
+                        onClick={() => handleEditEstatus(registro)}
+                      >
                         <Edit size={16} />
-                      </button>
-                      <button className="action-button delete-button">
-                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
