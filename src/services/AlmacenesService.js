@@ -76,19 +76,19 @@ const AlmacenesService = {
     }
   },
 
-  createProducto: async (productoData) => {
-    try {
-      const token = getAuthToken();
-      const response = await api.post('/productos/nuevo', productoData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data;  
-    } catch (error) {
-      throw error.response?.data || new Error('Error creando producto');
-    }
-  },
+createProducto: async (productoData) => {
+  try {
+    const token = getAuthToken();
+    const response = await api.post('/productos/nuevo', productoData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;  
+  } catch (error) {
+    throw error.response?.data || new Error('Error creando producto');
+  }
+},
 
   getAllProductos: async (filters = {}) => {
     try {
@@ -105,6 +105,47 @@ const AlmacenesService = {
     }
   },
 
+  getProductoById: async (id) => {
+    try {
+      const token = getAuthToken();
+      const response = await api.get(`/productos/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || new Error('Error obteniendo el producto');
+    }
+  },
+
+  updateProducto: async (id, productoData) => {
+    try {
+      const token = getAuthToken();
+      const response = await api.put(`/productos/${id}`, productoData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || new Error('Error actualizando el producto');
+    }
+  },
+
+  deleteProducto: async (id) => {
+    try {
+      const token = getAuthToken();
+      const response = await api.delete(`/productos/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || new Error('Error eliminando el producto');
+    }
+  },
 // En AlmacenesService.js
 registrarMovimiento: async (movimientoData) => {
   try {
@@ -167,7 +208,6 @@ async updateMovimientoEstatus(movimientoId, nuevoEstatus) {
   }
 },
 
-// Método para obtener el estatus de un movimiento específico
 getMovimientoStatus: async (movimientoId) => {
   try {
     const token = getAuthToken();
@@ -186,6 +226,7 @@ getMovimientoStatus: async (movimientoId) => {
     throw error.response?.data || new Error("Error obteniendo estatus del movimiento");
   }
 }
+
 
 };
 

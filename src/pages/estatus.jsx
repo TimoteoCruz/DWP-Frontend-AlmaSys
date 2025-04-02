@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback, useEffect } from "react"
 import SideBar from "../Layouts/Sidebar"
-import { Package, Truck, CheckCircle } from "lucide-react"
+import { Package, Truck, CheckCircle } from 'lucide-react'
 import "../styles/estatus.css"
 import AlmacenesService from "../services/AlmacenesService"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -17,20 +17,41 @@ const Estatus = () => {
   const [estatus, setEstatus] = useState(movimiento?.estadoMostrar || "Procesado")
   const [fechaLlegada, setFechaLlegada] = useState(movimiento?.fechaLlegada || "Pendiente")
 
- 
-  const { data: statusData } = useLongPolling(() => AlmacenesService.getMovimientoStatus(movimiento.id), {
-    interval: 5000, 
-    enabled: !!movimiento?.id,
-    onSuccess: (data) => {
-      if (data.estatus && data.estatus !== estatus) {
-        setEstatus(data.estatus)
+  // Usar useCallback para la función de fetch
+  const fetchMovimientoStatus = useCallback(() => {
+    console.log('Llamando a getMovimientoStatus con ID:', movimiento?.id);
+    return AlmacenesService.getMovimientoStatus(movimiento?.id);
+  }, [movimiento?.id]);
 
-        if (data.estatus === "Recibido" && data.fechaLlegada) {
-          setFechaLlegada(data.fechaLlegada)
-        }
+  // Usar useCallback para onSuccess
+  const handleSuccessResponse = useCallback((data) => {
+    console.log('Datos recibidos en onSuccess:', data);
+    if (data.estatus && data.estatus !== estatus) {
+      setEstatus(data.estatus);
+      if (data.estatus === "Recibido" && data.fechaLlegada) {
+        setFechaLlegada(data.fechaLlegada);
       }
-    },
-  })
+    }
+  }, [estatus]);
+
+  // Usar las funciones con useCallback en el hook
+  const { data: statusData, isPolling } = useLongPolling(
+    fetchMovimientoStatus, 
+    {
+      interval: 5000,
+      enabled: !!movimiento?.id,
+      onSuccess: handleSuccessResponse,
+      onError: useCallback((err) => {
+        console.error('Error en polling:', err);
+      }, []),
+    }
+  );
+
+  // Agregar logs para depuración
+  useEffect(() => {
+    console.log('Movimiento:', movimiento);
+    console.log('Estado de polling:', isPolling);
+  }, [movimiento, isPolling]);
 
   const handleEstatusChange = async (newEstatus) => {
     setEstatus(newEstatus)
@@ -90,11 +111,11 @@ const Estatus = () => {
             </thead>
             <tbody>
               <tr>
-                <td>{movimiento.id}</td>
-                <td>{movimiento.nombreProducto}</td>
-                <td>{movimiento.almacenOrigenNombre}</td>
-                <td>{movimiento.almacenDestinoNombre}</td>
-                <td>{movimiento.cantidad}</td>
+                <td>{movimiento?.id || "N/A"}</td>
+                <td>{movimiento?.nombreProducto || "N/A"}</td>
+                <td>{movimiento?.almacenOrigenNombre || "N/A"}</td>
+                <td>{movimiento?.almacenDestinoNombre || "N/A"}</td>
+                <td>{movimiento?.cantidad || "N/A"}</td>
                 <td>
                   <select
                     value={estatus}
@@ -142,4 +163,3 @@ const Estatus = () => {
 }
 
 export default Estatus
-

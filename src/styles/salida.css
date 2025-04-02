@@ -156,19 +156,7 @@
   min-height: 80px;
 }
 
-.image-cell {
-  padding: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-.image-cell img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 6px;
-}
 
 .actions-cell {
   display: flex;

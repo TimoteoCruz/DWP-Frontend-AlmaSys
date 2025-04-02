@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SideBar from "../Layouts/Sidebar";
-import { Upload, Save, Box } from "lucide-react";
+import { Save } from "lucide-react";
 import "../styles/producto.css";
 import AlmacenesService from "../services/AlmacenesService"; 
 
@@ -14,10 +14,31 @@ const RegistroProducto = () => {
     stock: "",
     codigoSKU: "",
     fechaRegistro: "",
+    almacenID: "", // Campo para almacenar el ID del almacén seleccionado
   });
+  
+  const [almacenes, setAlmacenes] = useState([]); // Estado para almacenar la lista de almacenes
+  const [loading, setLoading] = useState(false); // Estado para controlar la carga de datos
+  const [error, setError] = useState(null); // Estado para manejar errores
 
-  const [imagen, setImagen] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState("");
+  // Cargar la lista de almacenes cuando el componente se monta
+  useEffect(() => {
+    const fetchAlmacenes = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const almacenesData = await AlmacenesService.getAllAlmacenes();
+        setAlmacenes(almacenesData);
+      } catch (error) {
+        console.error("Error al cargar almacenes:", error);
+        setError("No se pudieron cargar los almacenes. Por favor, intenta de nuevo.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlmacenes();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,26 +48,14 @@ const RegistroProducto = () => {
     });
   };
 
-  const handleImagenChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImagen(file);
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const productoData = {
-      ...formData,
-      imagen: imagen,
-    };
-
     try {
-      const response = await AlmacenesService.createProducto(productoData);
+      const response = await AlmacenesService.createProducto(formData);
       console.log("Producto registrado exitosamente:", response);
+      
+      // Limpiar el formulario después de un registro exitoso
       setFormData({
         nombreProducto: "",
         categoria: "",
@@ -54,11 +63,15 @@ const RegistroProducto = () => {
         stock: "",
         codigoSKU: "",
         fechaRegistro: "",
+        almacenID: "",
       });
-      setImagen(null);
-      setPreviewUrl("");
+      
+      // Aquí podrías mostrar una notificación de éxito
+      alert("Producto registrado exitosamente");
     } catch (error) {
       console.error("Error al registrar el producto:", error);
+      // Aquí podrías mostrar una notificación de error
+      alert(`Error al registrar el producto: ${error.message}`);
     }
   };
 
@@ -68,6 +81,8 @@ const RegistroProducto = () => {
         <div className="productos-header">
           <h1>Registro de Nuevo Producto</h1>
         </div>
+
+        {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="productos-form">
           <div className="form-row">
@@ -152,36 +167,33 @@ const RegistroProducto = () => {
             </div>
           </div>
 
-          <div className="imagen-upload-section">
-            <h3>Imagen del Producto</h3>
-            <div className="imagen-upload-container">
-              {previewUrl ? (
-                <div className="imagen-preview">
-                  <img src={previewUrl} alt="Vista previa del producto" />
-                </div>
-              ) : (
-                <div className="upload-placeholder">
-                  <Upload size={32} />
-                  <p>Por favor adjunte una foto del producto</p>
-                </div>
-              )}
-              <input
-                type="file"
-                id="imagen"
-                name="imagen"
-                onChange={handleImagenChange}
-                accept="image/*"
-                className="imagen-input"
-              />
-              <label htmlFor="imagen" className="imagen-label">
-                <Upload size={16} />
-                Seleccionar Imagen
-              </label>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="almacenID">Almacén</label>
+              <select
+                id="almacenID"
+                name="almacenID"
+                value={formData.almacenID}
+                onChange={handleChange}
+                className="form-control"
+                required
+              >
+                <option value="">Seleccione un almacén</option>
+                {loading ? (
+                  <option disabled>Cargando almacenes...</option>
+                ) : (
+                  almacenes.map((almacen) => (
+                    <option key={almacen.id} value={almacen.id}>
+                      {almacen.nombreAlmacen} - {almacen.codigo}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn-guardar">
+            <button type="submit" className="btn-guardar" disabled={loading}>
               <Save size={18} />
               Registrar Producto
             </button>

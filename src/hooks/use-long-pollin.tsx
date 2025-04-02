@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 
 type PollingOptions = {
   interval: number
@@ -10,12 +10,6 @@ type PollingOptions = {
   immediate?: boolean
 }
 
-/**
- * Custom hook para implementar long polling
- * @param fetchFn - La función a llamar para obtener datos
- * @param options - Opciones de configuración para el polling
- * @returns Objeto con datos, estado de carga, error y funciones de control
- */
 export function useLongPolling<T>(fetchFn: () => Promise<T>, options: PollingOptions) {
   const { interval, enabled = true, onSuccess, onError, immediate = true } = options
 
@@ -26,71 +20,111 @@ export function useLongPolling<T>(fetchFn: () => Promise<T>, options: PollingOpt
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const mountedRef = useRef<boolean>(true)
-
-  const fetchData = async () => {
-    if (!isPolling || !mountedRef.current) return
-
-    setLoading(true)
-    setError(null)
-
-    try {
-      const result = await fetchFn()
-
-      if (mountedRef.current) {
-        setData(result)
-        setLoading(false)
-        onSuccess?.(result)
-      }
-    } catch (err) {
-      if (mountedRef.current) {
-        setError(err as Error)
-        setLoading(false)
-        onError?.(err)
-      }
-    }
-
-    if (mountedRef.current && isPolling) {
-      timeoutRef.current = setTimeout(fetchData, interval)
-    }
-  }
-
-  const startPolling = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    setIsPolling(true)
-  }
-
-  const stopPolling = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-    }
-    setIsPolling(false)
-  }
+  const onSuccessRef = useRef(onSuccess)
+  const onErrorRef = useRef(onError)
+  const isPollingRef = useRef(isPolling)
+  const fetchFnRef = useRef(fetchFn)
 
   useEffect(() => {
-    if (isPolling && immediate) {
-      fetchData()
-    } else if (isPolling) {
-      timeoutRef.current = setTimeout(fetchData, interval)
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+    isPollingRef.current = isPolling;
+    fetchFnRef.current = fetchFn;
+  }, [onSuccess, onError, isPolling, fetchFn]);
+
+  const fetchData = useCallback(async () => {
+    if (!isPollingRef.current || !mountedRef.current) return;
+
+    setLoading(true);
+    console.log('Iniciando polling request', new Date().toISOString());
+
+    try {
+      const result = await fetchFnRef.current();
+      console.log('Polling response:', result);
+
+      if (mountedRef.current) {
+        setData(result);
+        setLoading(false);
+        if (onSuccessRef.current) {
+          onSuccessRef.current(result);
+        }
+      }
+    } catch (err) {
+      console.error('Error en polling:', err);
+      if (mountedRef.current) {
+        setError(err as Error);
+        setLoading(false);
+        if (onErrorRef.current) {
+          onErrorRef.current(err);
+        }
+      }
+    }
+
+    if (mountedRef.current && isPollingRef.current) {
+      console.log('Programando siguiente polling en', interval, 'ms');
+      timeoutRef.current = setTimeout(fetchData, interval);
+    }
+  }, [interval]);
+
+  const startPolling = useCallback(() => {
+    console.log('Iniciando polling');
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    isPollingRef.current = true;
+    setIsPolling(true);
+  }, []);
+
+  const stopPolling = useCallback(() => {
+    console.log('Deteniendo polling');
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    isPollingRef.current = false;
+    setIsPolling(false);
+  }, []);
+
+  useEffect(() => {
+    console.log('Estado de polling cambiado:', isPolling);
+    isPollingRef.current = isPolling;
+    
+    if (isPolling) {
+      if (immediate) {
+        fetchData();
+      } else {
+        timeoutRef.current = setTimeout(fetchData, interval);
+      }
+    } else if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
 
     return () => {
-      mountedRef.current = false
       if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
+        clearTimeout(timeoutRef.current);
       }
-    }
-  }, [isPolling])
+    };
+  }, [isPolling, immediate, interval, fetchData]);
 
   useEffect(() => {
+    console.log('Estado de enabled cambiado:', enabled);
+    
     if (enabled && !isPolling) {
-      setIsPolling(true)
+      setIsPolling(true);
     } else if (!enabled && isPolling) {
-      stopPolling()
+      stopPolling();
     }
-  }, [enabled])
+  }, [enabled, isPolling, stopPolling]);
+
+  useEffect(() => {
+    return () => {
+      console.log('Componente desmontado');
+      mountedRef.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return {
     data,
@@ -100,6 +134,5 @@ export function useLongPolling<T>(fetchFn: () => Promise<T>, options: PollingOpt
     startPolling,
     stopPolling,
     refetch: fetchData,
-  }
+  };
 }
-

@@ -184,7 +184,6 @@ const Entrada = () => {
           ) : (
             <div className="entrada-table">
               <div className="entrada-table-header">
-                <div className="header-cell image-cell">Imagen</div>
                 <div className="header-cell">Código</div>
                 <div className="header-cell">Producto</div>
                 <div className="header-cell">Almacén Origen</div>
@@ -198,12 +197,6 @@ const Entrada = () => {
               <div className="entrada-table-body">
                 {filteredRegistros.map((registro) => (
                   <div key={registro.id} className="entrada-table-row">
-                    <div className="cell image-cell">
-                      <img
-                        src={registro.imagen || "/images/placeholder.jpg"}
-                        alt={registro.nombreProducto || "Producto desconocido"}
-                      />
-                    </div>
                     <div className="cell">{registro.codigoSKU || "N/A"}</div>
                     <div className="cell">{registro.nombreProducto || "Producto desconocido"}</div>
                     <div className="cell">{registro.almacenOrigenNombre}</div>
@@ -234,4 +227,3 @@ const Entrada = () => {
 }
 
 export default Entrada
-

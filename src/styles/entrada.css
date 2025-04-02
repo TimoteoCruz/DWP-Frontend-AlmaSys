@@ -114,7 +114,7 @@
   .entrada-table {
     width: 100%;
     display: grid;
-    grid-template-columns: 100px 120px 1.2fr 1fr 1fr 120px 140px 140px 120px;
+    grid-template-columns: 100px 1fr 1fr 1fr 120px 140px 140px 100px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     overflow: hidden;
@@ -154,20 +154,6 @@
     display: flex;
     align-items: center;
     min-height: 80px; 
-  }
-  
-  .image-cell {
-    padding: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .image-cell img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 6px; 
   }
   
   .actions-cell {
