@@ -233,48 +233,6 @@ const AlmacenesService = {
       console.error("Error obteniendo estatus:", error);
       throw error.response?.data || error;
     }
-  },
-
-  // Método específico para long polling de estatus
-  longPollMovimientoStatus: async (movimientoId, lastKnownStatus) => {
-    try {
-      const token = getAuthToken();
-      console.log(`Iniciando long polling para movimiento: ${movimientoId}, último estatus conocido: ${lastKnownStatus}`);
-      
-      // Como el endpoint de poll puede no existir en el backend, usamos el endpoint normal
-      // pero simulamos el comportamiento de long polling con un intervalo corto
-      const response = await api.get(`/movimientos/${movimientoId}/status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        // Timeout corto para simular long polling
-        timeout: 5000, 
-      });
-      
-      console.log('Datos de long polling recibidos:', response.data);
-      
-      if (response.data) {
-        // Verificar si el estatus ha cambiado
-        if (response.data.estatus && response.data.estatus !== lastKnownStatus) {
-          console.log(`Estatus cambiado: ${lastKnownStatus} -> ${response.data.estatus}`);
-          return response.data;
-        } else {
-          console.log('No hay cambios en el estatus');
-          return { estatus: lastKnownStatus, noChange: true };
-        }
-      } else {
-        throw new Error("No se encontraron datos en long polling");
-      }
-    } catch (error) {
-      // Si es un timeout, no es realmente un error en este contexto
-      if (error.code === 'ECONNABORTED') {
-        console.log('Long polling timeout, reiniciando...');
-        return { estatus: lastKnownStatus, noChange: true };
-      }
-      
-      console.error("Error en long polling:", error);
-      throw error.response?.data || error;
-    }
   }
 };
 

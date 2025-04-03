@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import SideBar from "../Layouts/Sidebar"
 import { Package, Truck, CheckCircle } from 'lucide-react'
 import "../styles/sestatus.css"
 import AlmacenesService from "../services/AlmacenesService"
 import { useLocation, useNavigate } from "react-router-dom"
-import { useLongPolling } from "../hooks/use-long-pollin"
+import { useLongPolling } from "../hooks/use-long-polling"
 
 const SEstatus = () => {
   const location = useLocation()
@@ -16,56 +16,122 @@ const SEstatus = () => {
 
   const [estatus, setEstatus] = useState(movimiento?.estadoMostrar || "Procesado")
   const [fechaLlegada, setFechaLlegada] = useState(movimiento?.fechaLlegada || "Pendiente")
+  const estatusRef = useRef(estatus)
 
-  // Usar useCallback para la función de fetch
-  const fetchMovimientoStatus = useCallback(() => {
-    console.log('Llamando a getMovimientoStatus con ID:', movimiento?.id);
-    return AlmacenesService.getMovimientoStatus(movimiento?.id);
-  }, [movimiento?.id]);
-
-  // Usar useCallback para onSuccess
-  const handleSuccessResponse = useCallback((data) => {
-    console.log('Datos recibidos en onSuccess:', data);
-    if (data.estatus && data.estatus !== estatus) {
-      setEstatus(data.estatus);
-      if (data.estatus === "Recibido" && data.fechaLlegada) {
-        setFechaLlegada(data.fechaLlegada);
-      }
-    }
+  // Actualizar referencia del estado para usar en callbacks
+  useEffect(() => {
+    estatusRef.current = estatus;
   }, [estatus]);
 
-  // Usar las funciones con useCallback en el hook
-  const { data: statusData, isPolling } = useLongPolling(
-    fetchMovimientoStatus, 
-    {
-      interval: 5000,
-      enabled: !!movimiento?.id,
-      onSuccess: handleSuccessResponse,
-      onError: useCallback((err) => {
-        console.error('Error en polling:', err);
-      }, []),
+  // Actualizar el estado y el DOM cuando se recibe una actualización
+  const updateStateAndDOM = (newEstatus, newFechaLlegada) => {
+    if (newEstatus && newEstatus !== estatus) {
+      console.log('Actualizando estatus en el DOM:', newEstatus);
+      setEstatus(newEstatus);
     }
-  );
+    if (newFechaLlegada && newFechaLlegada !== fechaLlegada) {
+      console.log('Actualizando fecha de llegada en el DOM:', newFechaLlegada);
+      setFechaLlegada(newFechaLlegada);
+    }
+  };
+  
+  // Función para obtener el estado actual del movimiento
+  const fetchEstatus = async () => {
+    if (!movimiento?.id) {
+      console.log('No hay ID de movimiento, no se puede obtener estatus');
+      return null;
+    }
+    
+    console.log('Obteniendo estatus mediante polling para movimiento:', movimiento.id);
+    try {
+      // Usar el método de long polling que espera cambios en el servidor
+      const data = await AlmacenesService.longPollMovimientoStatus(movimiento.id, estatusRef.current);
+      
+      // Si no hay cambios, simplemente devolver el estado actual
+      if (data.noChange) {
+        console.log('No hay cambios en el estatus, manteniendo estado actual');
+        return { estatus: estatusRef.current, fechaLlegada };
+      }
+      
+      console.log('Datos de estatus obtenidos mediante long polling:', data);
+      return data;
+    } catch (error) {
+      console.error('Error al obtener estatus mediante long polling:', error);
+      return null;
+    }
+  };
 
-  // Agregar logs para depuración
+  // Configurar long polling para actualizaciones de estado
+  const { data: estatusData, startPolling, stopPolling } = useLongPolling(fetchEstatus, {
+    interval: 1000, // Intervalo de 1 segundo para mayor reactividad
+    enabled: !!movimiento?.id, // Habilitar solo si hay ID de movimiento
+    immediate: true, // Ejecutar inmediatamente al montar
+    onSuccess: (data) => {
+      if (data && data.estatus) {
+        console.log('Actualización recibida por long polling:', data);
+        // Verificar si hay cambios reales en el estatus
+        if (data.estatus !== estatus || (data.fechaLlegada && data.fechaLlegada !== fechaLlegada)) {
+          console.log('Actualizando estado local con nuevos datos');
+          updateStateAndDOM(data.estatus, data.fechaLlegada);
+        }
+      }
+    },
+    onError: (error) => {
+      console.error('Error en long polling:', error);
+      // Reintentar después de un error
+      setTimeout(startPolling, 2000);
+    }
+  });
+  
+  // Forzar actualización inmediata cuando cambia el ID del movimiento
   useEffect(() => {
-    console.log('Movimiento:', movimiento);
-    console.log('Estado de polling:', isPolling);
-  }, [movimiento, isPolling]);
+    if (movimiento?.id) {
+      console.log('ID de movimiento cambiado, forzando actualización');
+      stopPolling();
+      startPolling();
+    }
+  }, [movimiento?.id]);
+  
+  // Efectos al cambiar datos de estatusData
+  useEffect(() => {
+    if (estatusData) {
+      console.log('Datos de estatus actualizados:', estatusData);
+      if (estatusData.estatus !== estatus || 
+          (estatusData.fechaLlegada && estatusData.fechaLlegada !== fechaLlegada)) {
+        updateStateAndDOM(estatusData.estatus, estatusData.fechaLlegada);
+      }
+    }
+  }, [estatusData, estatus, fechaLlegada]);
 
   const handleEstatusChange = async (newEstatus) => {
-    setEstatus(newEstatus)
+    if (newEstatus === estatus) {
+      console.log('El estatus es el mismo, no se actualiza');
+      return;
+    }
 
-    let nuevaFecha = fechaLlegada
+    console.log('Iniciando actualización de estatus a:', newEstatus);
+    setEstatus(newEstatus);
+    
+    let nuevaFecha = fechaLlegada;
     if (newEstatus === "Recibido") {
-      nuevaFecha = new Date().toLocaleString()
-      setFechaLlegada(nuevaFecha)
+      nuevaFecha = new Date().toLocaleString();
+      setFechaLlegada(nuevaFecha);
     }
 
     try {
-      await AlmacenesService.updateMovimientoEstatus(movimiento.id, newEstatus)
+      console.log('Enviando actualización al servidor...');
+      // Actualizar el estatus en el servidor
+      await AlmacenesService.updateMovimientoEstatus(movimiento.id, newEstatus);
+      console.log('Estatus actualizado exitosamente en el servidor:', newEstatus);
+      
+      // Forzar una actualización inmediata del polling para que otras ventanas
+      // detecten el cambio más rápido
+      stopPolling();
+      startPolling();
     } catch (error) {
-      console.error("Error al actualizar el estatus:", error)
+      console.error('Error al actualizar el estatus:', error);
+      setEstatus(estatusRef.current);
+      setFechaLlegada(fechaLlegada);
     }
   }
 

@@ -6,7 +6,7 @@ import { FileText, Filter, ChevronDown, Box, Edit } from "lucide-react"
 import AlmacenesService from "../services/AlmacenesService"
 import { useNavigate } from "react-router-dom"
 import "../styles/salida.css"
-import { useLongPolling } from "../hooks/use-long-pollin"
+import { useLongPolling } from "../hooks/use-long-polling"
 
 const Salida = () => {
   const navigate = useNavigate()
