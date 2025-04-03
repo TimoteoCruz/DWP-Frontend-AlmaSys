@@ -24,32 +24,16 @@ const NuevaSalida = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productosData = await AlmacenesService.getAllProductos();
-        const almacenesData = await AlmacenesService.getAllAlmacenes();
-  
-        // Agrupar productos por nombre y sumar sus stocks
-        const productosUnicos = {};
-        productosData.forEach((prod) => {
-          if (!productosUnicos[prod.nombreProducto]) {
-            productosUnicos[prod.nombreProducto] = {
-              id: prod.id, // Puedes guardar un ID cualquiera
-              nombre: prod.nombreProducto,
-              stockTotal: prod.stock,
-            };
-          } else {
-            productosUnicos[prod.nombreProducto].stockTotal += prod.stock;
-          }
-        });
-  
-        setProductos(Object.values(productosUnicos)); // Convertir en array
-        setAlmacenes(almacenesData.map((alm) => ({ id: alm.id, nombre: alm.nombreAlmacen })));
+        const productosData = await AlmacenesService.getAllProductos()
+        const almacenesData = await AlmacenesService.getAllAlmacenes()
+        setProductos(productosData.map((prod) => ({ id: prod.id, nombre: prod.nombreProducto })))
+        setAlmacenes(almacenesData.map((alm) => ({ id: alm.id, nombre: alm.nombreAlmacen })))
       } catch (error) {
-        console.error("Error al obtener datos:", error);
+        console.error("Error al obtener datos:", error)
       }
-    };
-    fetchData();
-  }, []);
-  
+    }
+    fetchData()
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target

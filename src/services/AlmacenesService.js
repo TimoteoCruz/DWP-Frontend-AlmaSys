@@ -146,7 +146,6 @@ createProducto: async (productoData) => {
       throw error.response?.data || new Error('Error eliminando el producto');
     }
   },
-// En AlmacenesService.js
 registrarMovimiento: async (movimientoData) => {
   try {
     const token = getAuthToken();
