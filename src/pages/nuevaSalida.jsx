@@ -5,6 +5,7 @@ import SideBar from "../Layouts/Sidebar"
 import { Save } from "lucide-react"
 import "../styles/nuevaEntrada.css"
 import AlmacenesService from "../services/AlmacenesService"
+import Swal from 'sweetalert2'
 
 const NuevaSalida = () => {
   const [formData, setFormData] = useState({
@@ -30,6 +31,11 @@ const NuevaSalida = () => {
         setAlmacenes(almacenesData.map((alm) => ({ id: alm.id, nombre: alm.nombreAlmacen })))
       } catch (error) {
         console.error("Error al obtener datos:", error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los datos necesarios'
+        })
       }
     }
     fetchData()
@@ -47,7 +53,11 @@ const NuevaSalida = () => {
     e.preventDefault()
 
     if (formData.almacenSalida === formData.almacenLlegada) {
-      alert("El almacén de salida no puede ser el mismo que el de llegada.")
+      Swal.fire({
+        icon: 'warning',
+        title: 'Verificar almacenes',
+        text: 'El almacén de salida no puede ser el mismo que el de llegada.'
+      })
       return
     }
 
@@ -64,7 +74,14 @@ const NuevaSalida = () => {
       }
 
       await AlmacenesService.registrarMovimiento(movimiento)
-      alert("Salida registrada exitosamente")
+      
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Salida registrada exitosamente',
+        showConfirmButton: false,
+        timer: 1500
+      })
 
       setFormData({
         producto: "",
@@ -78,7 +95,12 @@ const NuevaSalida = () => {
       })
     } catch (error) {
       console.error("Error al registrar salida:", error)
-      alert("Error al registrar la salida: " + (error.message || "Error desconocido"))
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `Error al registrar la salida: ${error.message || "Error desconocido"}`
+      })
     }
   }
 
@@ -219,4 +241,3 @@ const NuevaSalida = () => {
 }
 
 export default NuevaSalida
-

@@ -3,7 +3,7 @@ import SideBar from "../Layouts/Sidebar";
 import { Save } from 'lucide-react';
 import "../styles/nuevaEntrada.css";
 import AlmacenesService from "../services/AlmacenesService";
-
+import Swal from 'sweetalert2';
 
 const NuevaEntrada = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +18,6 @@ const NuevaEntrada = () => {
     tipoMovimiento: "entrada"  
   });
   
-
   const [productos, setProductos] = useState([]);
   const [almacenes, setAlmacenes] = useState([]);
 
@@ -31,6 +30,11 @@ const NuevaEntrada = () => {
         setAlmacenes(almacenesData.map(alm => ({ id: alm.id, nombre: alm.nombreAlmacen })));
       } catch (error) {
         console.error("Error al obtener datos:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los datos necesarios'
+        });
       }
     };
     fetchData();
@@ -48,7 +52,11 @@ const NuevaEntrada = () => {
     e.preventDefault();
   
     if (formData.almacenSalida === formData.almacenLlegada) {
-      alert("El almacén de salida no puede ser el mismo que el de llegada.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Verificar almacenes',
+        text: 'El almacén de salida no puede ser el mismo que el de llegada.'
+      });
       return;
     }
   
@@ -65,7 +73,14 @@ const NuevaEntrada = () => {
       };
   
       await AlmacenesService.registrarMovimiento(movimiento);
-      alert("Movimiento registrado exitosamente");
+      
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Movimiento registrado exitosamente',
+        showConfirmButton: false,
+        timer: 1500
+      });
       
       setFormData({
         producto: "",
@@ -80,11 +95,15 @@ const NuevaEntrada = () => {
       });
     } catch (error) {
       console.error("Error al registrar movimiento:", error);
-      alert("Error al registrar el movimiento: " + (error.message || "Error desconocido"));
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `Error al registrar el movimiento: ${error.message || "Error desconocido"}`
+      });
     }
   };
   
-
   return (
     <SideBar>
       <div className="nueva-entrada-container">
