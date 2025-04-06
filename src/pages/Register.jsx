@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import AuthService from "../services/authService"; 
 import "../styles/Register.css";
 import Footer from "../Layouts/footer";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,7 +25,13 @@ const Register = () => {
     e.preventDefault();
     try {
       const response = await AuthService.register(formData.email, formData.empresa, formData.password, formData.numeroEmpleado, formData.rfc);
-      setMessage(response.message);  
+      setMessage(response.message);
+      
+      // Esperar un breve momento para mostrar el mensaje de éxito
+      setTimeout(() => {
+        // Redirigir al usuario a la página de login
+        navigate("/login");
+      }, 1500);
     } catch (error) {
       setMessage(error.message || "Error al registrar usuario");
     }
