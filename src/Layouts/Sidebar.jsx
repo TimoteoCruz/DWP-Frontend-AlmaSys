@@ -85,12 +85,7 @@ const SideBar = ({ children }) => {
             <span>{breadcrumbMap[location.pathname] || "Inicio"}</span>
           </div>
 
-          <div className="search-container">
-            <div className="input-wrapper">
-              <input type="text" className="search-input" placeholder="Escribe algo aquí" />
-            </div>
-          </div>
-
+          
           <div className="user-logged-in">
             <div className="user-avatar">
               <i className="user-icon"></i>
