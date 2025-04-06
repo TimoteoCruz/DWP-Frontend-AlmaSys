@@ -377,12 +377,7 @@ const Programar = () => {
                         <td>{programada.estado || 'pendiente'}</td>
                         <td>
                           <div className="table-actions">
-                            <button 
-                              className="action-button edit-button"
-                              onClick={() => handleEdit(programada.id)}
-                            >
-                              <Edit size={16} />
-                            </button>
+                           
                             <button 
                               className="action-button delete-button"
                               onClick={() => handleDelete(programada.id)}
