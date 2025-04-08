@@ -40,7 +40,8 @@ const Login = () => {
 
       await AuthService.sendVerificationCode(email);
 
-      showAlert('success', 'Inicio de sesión exitoso', 'Redirigiendo a verificación de dos pasos...');
+      showAlert('success', 'Redirigiendo a MFA', 'Redirigiendo a verificación de dos pasos...');
+
 
       navigate('/mfa', { state: { email: email } });
 
