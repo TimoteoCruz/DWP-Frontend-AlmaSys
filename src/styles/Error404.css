@@ -1,0 +1,47 @@
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: white;
+  color: black;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.login-button {
+  background-color: #3b82f6; 
+  color: white;
+  padding: 12px 24px;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+.login-button:hover {
+  background-color: #2563eb; 
+}
+
+.error-code {
+  font-size: 120px;
+  font-weight: bold;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  font-size: 100px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.zero {
+  font-size: 100px;
+}
